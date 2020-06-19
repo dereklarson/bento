@@ -1,0 +1,49 @@
+/* ---- DatePicker ---- */
+.bento-theme [class*="Calendar"]:not([class*="blocked"]),
+.bento-theme [class*="DayPicker"],
+.bento-theme [class*="DateInput"] {
+	color: #999; /* Something indicating optionality */
+	background-color: #222;
+}
+
+.bento-theme [class*="blocked"] {
+	color: #444 !important; /* Something indicating it can't be used */
+	background-color: #111 !important;
+}
+
+/* ---- Dropdown ---- */
+/* Handles the Select box attributes for the dropdowns */
+.bento-theme .Select-control,
+.bento-theme .Select-menu-outer {
+	color: #999; /* Something indicating optionality */
+	/* note there seems to be some stylesheets that try to override this */
+	background-color: #222 !important;
+	background-clip: padding-box;
+	border: 1px solid darkgray;
+}
+
+/* Selected values should be bolder */
+.bento-theme .Select.has-value.Select--single > .Select-control,
+.bento-theme .Select-value,
+.bento-theme .Select-value-label {
+	/* note there seems to be some stylesheets that try to override this */
+	color: #bbb !important;
+}
+
+/* ---- Data Table ---- */
+/* This will deal with the table cells */
+/* NOTE Dash_table seems to load a bunch of CSS that will override anything here
+ * unless you set them as important */
+.bento-theme .dash-cell {
+	color: #aaa !important;
+	background-color: #222 !important;
+	border: 1px solid darkgray !important;
+}
+
+/* This covers the headers/filters */
+.bento-theme th,
+.bento-theme th > input {
+	color: #ccc !important;
+	background-color: #444 !important;
+	border: 1px solid darkgray !important;
+}
