@@ -1,7 +1,7 @@
 import json
 from urllib import request
 
-from common import logger, dictutil  # noqa
+from bento.common import logger, dictutil  # noqa
 
 logging = logger.fancy_logger(__name__)
 

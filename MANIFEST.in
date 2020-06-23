@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+include requires-*.txt
+include bento/assets/*.css
+include bento/assets/*.csv

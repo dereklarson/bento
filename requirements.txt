@@ -1,9 +1,0 @@
-wheel
-pyyaml
-apscheduler
-prettyprinter
-gunicorn
-numpy
-scipy
-pandas
-dash

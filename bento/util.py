@@ -3,7 +3,7 @@ import numpy as np
 import math
 import plotly.express as px
 
-from common import logger, logutil, dictutil  # noqa
+from bento.common import logger, logutil, dictutil  # noqa
 
 logging = logger.fancy_logger(__name__)
 

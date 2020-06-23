@@ -4,8 +4,8 @@ All defined env variables should be here and the ENV export be used globally.
 import os
 from dataclasses import dataclass
 
-from common import logger
-from common.dictutil import Edict
+from bento.common import logger
+from bento.common.dictutil import Edict
 
 logging = logger.fancy_logger(__name__)
 

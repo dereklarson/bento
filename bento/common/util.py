@@ -1,15 +1,16 @@
-import subprocess
-import re
+import glob
 import hashlib
+import inspect
 import pathlib
 import pickle
-import glob
-import inspect
+import pkgutil
+import re
+import subprocess
 import time
 import pandas as pd
 
-from common.structure import ENV
-from common.logger import fancy_logger
+from bento.common.structure import ENV
+from bento.common.logger import fancy_logger
 
 logging = fancy_logger(__name__)
 
@@ -47,7 +48,7 @@ def nice_command(cmd):
         logging.info("...Done")
 
 
-def loader(filename, parse_date=True):
+def loader(filename, package="bento", parse_date=True):
     args = {
         "index_col": 0,
         "parse_dates": ["date"] if parse_date else [],
@@ -59,8 +60,12 @@ def loader(filename, parse_date=True):
         try:
             df = pd.read_csv(f"assets/{filename}", **args)
         except FileNotFoundError:
-            logging.warning(f"Couldn't find {filename}")
-            return None
+            try:
+                package_path = pkgutil.get_loader(package)._path._path[0]
+                df = pd.read_csv(f"{package_path}/assets/{filename}", **args)
+            except FileNotFoundError:
+                logging.warning(f"Couldn't find {filename}")
+                return None
 
     data = {"df": df}
     logging.info(f"*** Loaded {filename} ***")

@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 from bento import util as butil
 from bento.resources import geojson
-from common import logger, dictutil  # noqa
+from bento.common import logger, dictutil  # noqa
 
 logging = logger.fancy_logger(__name__)
 

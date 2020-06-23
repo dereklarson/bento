@@ -1,6 +1,6 @@
 import flask
 import functools
-from common import logger
+from bento.common import logger
 
 # logging = logger.fancy_logger(__name__)
 # We want to use a simple format here because we care about the wrapped function

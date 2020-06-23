@@ -6,7 +6,7 @@ A list of goals for these functions:
 """
 import math
 
-from common import logger, logutil, dictutil  # noqa
+from bento.common import logger, logutil, dictutil  # noqa
 from bento import util as butil
 
 logging = logger.fancy_logger(__name__)

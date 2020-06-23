@@ -1,9 +1,9 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from common.structure import ENV
+from bento.common.structure import ENV
 from bento import bento
 from bento import demo_descriptor as descriptor
-from common import logger
+from bento.common import logger
 
 logging = logger.fancy_logger(__name__)
 

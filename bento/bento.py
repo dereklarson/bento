@@ -8,9 +8,9 @@ from bento import util as butil
 from bento.banks import BentoBanks
 from bento import grid
 
-from common import logger, logutil, dictutil, codeutil  # noqa
+from bento.common import logger, logutil, dictutil, codeutil  # noqa
 
-# from common.structure import ENV
+# from bento.common.structure import ENV
 
 logging = logger.fancy_logger(__name__, fmt="simple")
 

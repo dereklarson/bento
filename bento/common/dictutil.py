@@ -1,6 +1,6 @@
 import re
 
-from common.logger import fancy_logger
+from bento.common.logger import fancy_logger
 
 logging = fancy_logger(__name__)
 

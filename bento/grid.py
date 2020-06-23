@@ -1,6 +1,6 @@
 import math
 
-from common import logger, logutil  # noqa
+from bento.common import logger, logutil  # noqa
 
 logging = logger.fancy_logger(__name__, level=10)
 

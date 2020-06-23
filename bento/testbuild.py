@@ -1,8 +1,8 @@
 import traceback
 
 from bento import bento
-from common.structure import ENV
-from common import logger
+from bento.common.structure import ENV
+from bento.common import logger
 
 logging = logger.fancy_logger("testbuild")
 

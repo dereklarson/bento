@@ -1,4 +1,4 @@
-from common import logger, util
+from bento.common import logger, util
 
 logging = logger.fancy_logger(__name__)
 

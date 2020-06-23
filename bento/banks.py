@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from common import logger, logutil, codeutil, dictutil  # noqa
+from bento.common import logger, logutil, codeutil, dictutil  # noqa
 import bento.components as bc
 
 from bento import util as butil

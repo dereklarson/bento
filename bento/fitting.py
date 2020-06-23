@@ -5,8 +5,8 @@ import numpy as np
 
 from scipy.optimize import curve_fit
 
-from common.logger import fancy_logger
-from common.util import id_func
+from bento.common.logger import fancy_logger
+from bento.common.util import id_func
 
 logging = fancy_logger(__name__)
 

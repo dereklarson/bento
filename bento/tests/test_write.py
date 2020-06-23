@@ -1,6 +1,6 @@
 import traceback
-from common.structure import ENV
-from common import logger
+from bento.common.structure import ENV
+from bento.common import logger
 from bento import default_desc, complex_desc
 import dash
 

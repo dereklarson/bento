@@ -1,4 +1,4 @@
-from common import logger
+from bento.common import logger
 from loaddata import nyt
 from bento.bento import Bento
 

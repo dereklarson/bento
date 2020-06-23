@@ -1,0 +1,14 @@
+#Deviations from monorepo bento#
+added test_gen.py to demo the templating
+common has been moved inside bento for the time being, until a util package is split
+added an extra location check for the sample data (., assets/, + bento/assets/)
+
+# build package for Pypi upload
+python setup.py sdist bdist_wheel
+
+# upload with twine (.whl and .tar.gz in dist/). First check with,
+twin check dist/*
+# Test with test server
+twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+# Then to the official repo
+twine upload dist/*

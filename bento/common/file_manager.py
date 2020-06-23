@@ -4,8 +4,8 @@ import pathlib
 import shutil
 import yaml
 
-from common import logger, logutil, dictutil
-from common.structure import ENV
+from bento.common import logger, logutil, dictutil
+from bento.common.structure import ENV
 
 logging = logger.fancy_logger(__name__)
 

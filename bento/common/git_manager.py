@@ -1,9 +1,9 @@
 import git
 
-from common import logger, logutil, util
+from bento.common import logger, logutil, util
 
 # TODO add in structure to class somehow?
-from common.structure import ENV
+from bento.common.structure import ENV
 
 logging = logger.fancy_logger("git")
 

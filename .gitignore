@@ -10,6 +10,7 @@ __pycache__/
 _build/
 build/
 dist/
+*.egg-info/
 
 # Unit test / coverage reports
 htmlcov/

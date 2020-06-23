@@ -1,4 +1,4 @@
-from common import logger, dictutil
+from bento.common import logger, dictutil
 
 logging = logger.fancy_logger(__name__)
 

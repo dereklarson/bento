@@ -11,7 +11,7 @@ from bento.graph import Graph
 import bento.util as butil
 
 # TODO merge the few dictutil items into bento util in bento repo
-from common import logger, dictutil
+from bento.common import logger, dictutil
 
 # Import the supplied data loading modules
 {% for dataid, entry in data.items() %}

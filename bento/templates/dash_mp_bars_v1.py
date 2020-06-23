@@ -8,7 +8,7 @@ from bento.style import BentoStyle
 from bento.graph import Graph
 import bento.util as butil
 
-from common import logger, dictutil
+from bento.common import logger, dictutil
 from loaddata import example
 
 logging = logger.fancy_logger(__name__)
