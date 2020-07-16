@@ -3,7 +3,7 @@ import git
 from bento.common import logger, logutil, util
 
 # TODO add in structure to class somehow?
-from bento.common.structure import ENV
+from bento.common.structure import PathConf
 
 logging = logger.fancy_logger("git")
 
@@ -17,9 +17,9 @@ class GitManager:
         self.host_cmd = "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"
         self.cache_to_repo = "cp -r cache/{folder} repositories/{org}"
 
-    @logutil.logdebug
+    @logutil.loginfo(level="debug")
     def clone_repo(self, repository, local_path=".", read_only=False):
-        full_path = "{}/{}".format(ENV.ORG_PATH, local_path)
+        full_path = f"{PathConf.git.path}/{local_path}"
         logging.warning(f"Cloning {repository} to {full_path}")
         if read_only:
             git.Repo.clone_from(f"https://github.com/{repository}", full_path)
@@ -30,9 +30,9 @@ class GitManager:
             util.logged_command(self.host_cmd, shell=True)
             git.Repo.clone_from(f"git@github.com:{repository}", full_path)
 
-    @logutil.logdebug
+    @logutil.loginfo(level="debug")
     def check_repo(self, local_path="."):
-        full_path = "{}/{}".format(ENV.ORG_PATH, local_path)
+        full_path = f"{PathConf.git.path}/{local_path}"
         try:
             self.repo = git.Repo(full_path)
             assert not self.repo.bare
@@ -44,7 +44,7 @@ class GitManager:
             logging.warning("failed check_repo")
             logging.warning(exc)
 
-    @logutil.logdebug
+    @logutil.loginfo(level="debug")
     def push_changes(self, branch="autocommit", commit_msg="automated_msg"):
         copy_library = self.cache_to_repo.format(
             folder="library", org="sample_business"

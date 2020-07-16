@@ -1,48 +1,44 @@
-"""This is an attempt to structure the ingesting of environment variables.
-All defined env variables should be here and the ENV export be used globally.
+"""This file defines the needed paths used within an app. It combines information
+supplied by environment variables and yields a convenient interface for file ops.
 """
-import os
-from dataclasses import dataclass
+import glob
+import pathlib
+import pickle
+import pandas as pd
 
 from bento.common import logger
-from bento.common.dictutil import Edict
+from bento.common.environment import ENV
 
 logging = logger.fancy_logger(__name__)
 
 
-@dataclass
-class ENV_SPEC:
-    # Generic
-    DEV: bool = False
+class PathDef:
+    def __init__(self, path, make=False, ext=None):
+        if path.startswith("/"):
+            self.path = path
+        elif path.startswith("~"):
+            self.path = path.replace("~", ENV.HOME)
+        else:
+            self.path = f"{ENV.APP_HOME}/{path}"
+        self.ext = ext
 
-    # Organization configuration
-    ORG_PATH: str = "repositories"
-    CACHE: str = "cache"
-    REGISTRY: str = ""
+        if make:
+            pathlib.Path(self.path).mkdir(parents=True, exist_ok=True)
 
-    # Python generic variables
-    PYCACHE_DIR: str = ".cache"
-    ASSETS_DIR: str = "assets"
+    def glob(self):
+        pattern = f"{self.path}/*.{self.ext}"
+        return glob.glob(pattern)
 
-    # Specifying the build environment for Aleph
-    BUILD_DIR: str = "cache/shared"
-    DOCKER_PREFIX: str = "aleph__"
+    def dump(self, result, filename):
+        with open(f"{self.path}/{filename}", "wb") as fh:
+            pickle.dump(result, fh)
 
-    PIPELINE_TECH: str = "beam"
-
-    # Bento specific variables
-    BENTO_PORT: int = 7777
-    DATA_REPO: str = "/app/data"
-    REFRESH_HOURS: int = 2
-
-
-# Get all environment variables that are part of the dataclass
-ENV = ENV_SPEC(**(Edict(os.environ) & Edict(ENV_SPEC())))
-logging.debug("---Environment variables:")
-logging.debug(vars(ENV))
+    def read(self, filename):
+        return pd.read_csv(f"{self.path}/{filename}.{self.ext}")
 
 
-if __name__ == "__main__":
-    os.environ["REGISTRY"] = "gcr.io/backend-243722"
-    logging.info(f"Loaded environment via {__name__}")
-    logging.debug(vars(ENV))
+class PathConf:
+    build = PathDef(path=ENV.BUILD_DIR)
+    data = PathDef(path=ENV.DATA_DIR, ext="csv")
+    pycache = PathDef(path=ENV.PYCACHE_DIR, make=True, ext="pkl")
+    git = PathDef(path=ENV.ORG_DIR)

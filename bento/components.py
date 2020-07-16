@@ -35,7 +35,7 @@ def _create(component_class, id_dict, args, lib="dcc", suffix="", label=None, **
 
 
 # --- The rest are all component wrappers ---
-# @logutil.logdebug
+# @logutil.loginfo(level='debug')
 def graph(id_dict, **kwargs):
     # TODO Flesh this out
     # This sets the graphs to take up space but not be visible prior to callback
@@ -65,17 +65,13 @@ def slider(id_dict, series, label=None, marks=False, variant="auto", **kwargs):
     if variant == "date":
         args = {
             "value": kwargs.get("value") or int(series.min()),
-            "min": int(series.min()) / 1000000,
+            "min": int(series.min()),
             "max": int(series.max()),
         }
 
     if marks:
         args["marks"] = butil.gen_marks(series, variant)
         args["step"] = None
-    else:
-        args.update(
-            {"min": series.min(), "max": series.max(),}
-        )
     return _create("Slider", id_dict, args, label=label, **kwargs)
 
 
@@ -94,8 +90,8 @@ def date_picker(id_dict, series, label=None, variant="single", **kwargs):
     args = {
         "min_date_allowed": series.min(),
         "max_date_allowed": series.max(),
-        "initial_visible_month": series.min(),
-        "date": series.min(),
+        "initial_visible_month": series.max(),
+        "date": series.max(),
     }
     return _create("DatePickerSingle", id_dict, args, label=label, **kwargs)
 

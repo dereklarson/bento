@@ -114,10 +114,10 @@ class FileManager:
 
     @classmethod
     def cache_path(cls, path_list, uid):
-        return f"{ENV.CACHE}/{'/'.join(path_list)}/{uid}.yaml"
+        return f"{ENV.STORAGE_DIR}/{'/'.join(path_list)}/{uid}.yaml"
 
     @classmethod
-    @logutil.logdebug
+    @logutil.loginfo(level="debug")
     def remove_content(cls, payload):
         path_list, uid = dictutil.pluck(payload)
         path = cls.cache_path(path_list, uid)
@@ -125,7 +125,7 @@ class FileManager:
         return {"path": path}
 
     @classmethod
-    @logutil.logdebug
+    @logutil.loginfo(level="debug")
     def save_content(cls, payload):
         path_list, state, uid = dictutil.pluck(payload)
         state["location"] = path_list[1]

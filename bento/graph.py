@@ -59,7 +59,8 @@ class Graph:
                 default_settings = {
                     "x": trace_df[x_column],
                     "y": trace_df[y_column],
-                    "text": trace_df["label"],
+                    # TODO Fix up hover info for non-map plots
+                    # "text": trace_df["hover_info"],
                     "name": trace_df.name,
                 }
 
@@ -130,7 +131,7 @@ class Graph:
         z_column=None,
         geo="us_states",
         mapbox_center="default",
-        mapbox_style="carto-darkmatter",
+        mapbox_style="carto-positron",
         mapbox_zoom=3,
         marker_size=5,
         marker_opacity=0.8,
@@ -144,31 +145,44 @@ class Graph:
         # First, create the single data trace
         base_args = {
             "marker_opacity": marker_opacity,
+            "name": getattr(idf, "name", ""),
         }
         pdf = butil.filter_df(idf, filters)
 
         if variant == "scatter":
             pdf = pdf.groupby(["latitude", "longitude"]).sum().reset_index()
+            hovertemplate = "<b>Loc</b><br>Latitude: %{lat}<br>Longitude: %{lon}<br>"
             args = {
                 **base_args,
                 "lon": pdf["longitude"],
                 "lat": pdf["latitude"],
                 "marker_size": marker_size,
+                "hovertemplate": hovertemplate,
             }
         elif variant == "choropleth":
             # Leading two digits of fips are state code
-            if geo == "us_states":
-                pdf["fips"] = pdf["fips"].str.slice(0, 2)
-            pdf = pdf.groupby(["fips"]).sum().reset_index()
+            if "state" in geo:
+                geo = "us_states"
+                pdf.loc[:, "fips"] = pdf["fips"].astype(str).str.slice(0, 2)
+                pdf = pdf.groupby(["fips", "state"]).sum().reset_index()
+                text = pdf["state"]
+            elif "count" in geo:
+                geo = "us_counties"
+                text = pdf["county"]
+            ht_title = "<b>%{text}</b>"
+            ht_info = f"{z_column.title()}: %{{z:d}}"
+            hovertemplate = "<br>".join([ht_title, ht_info])
             args = {
                 **base_args,
                 "z": pdf[z_column],
                 "geojson": geojson[geo],
+                "text": text,
                 "locations": pdf["fips"],
                 "marker_line_width": marker_line_width,
                 "marker_line_color": marker_line_color,
                 "colorscale": butil.log_color_scale("Viridis", base=3),
                 "showscale": False,
+                "hovertemplate": hovertemplate,
             }
 
         trace = getattr(go, f"{variant.capitalize()}mapbox")(args)

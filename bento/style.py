@@ -1,4 +1,5 @@
 # These are CSS styles that roughly implement Material Design components
+from bento.common import dictutil
 
 
 def elevation(elev):
@@ -14,36 +15,39 @@ def grid_columns(n_col, pad_pct):
 
 dark_text = "#212529"  # Default text color for a light background
 light_text = "#aaaaaa"  # Default text color for a dark background
-theme_text = "#7FDBFF"  # A light blue
-theme_text = "#f7021f"  # A Marsish red?
+primary = "#f7021f"  # A Marsish red?
 
 # TODO Abstract primary colors away with the "50-1000" system
-themes = {
+theme_keywords = {
     "light": {
-        # Colors
         "class_name": None,
-        "color": dark_text,
-        "backup_color": dark_text,
-        "primary": "#ed4415",
-        "app_bar": "#ed4415",
-        "main_color": "#FCFCFC",
-        "paper_color": "#F1F1F1",
-        "plot_bg_color": "#E8E9EA",
+        # Colors
+        "color__primary": primary,
+        "color__on_surface": dark_text,
+        "color__on_surface_secondary": dark_text,
+        # "color__appbar": "#ed4415",
+        "color__appbar": primary,
+        "color__background": "#FCFCFC",
+        "color__surface": "#F1F1F1",
+        "color__plot_bg": "#E8E9EA",
         # Density
         "pad_unit": 4,
         "pad_pct": 1.0,
         # Flatness
         "elevation": 4,
+        # Map
+        "map__mapbox_style": "carto-positron",
     },
     "dark": {
         "class_name": "bento-theme",  # Required for dropdowns, etc.
-        "color": theme_text,
-        "backup_color": light_text,
-        "primary": "#8d3212",
-        "app_bar": "#222222",
-        "main_color": "#121212",
-        "paper_color": "#222222",
-        "plot_bg_color": "#333333",
+        "color__on_surface": primary,
+        "color__on_surface_secondary": light_text,
+        "color__primary": "#8d3212",
+        "color__appbar": "#222222",
+        "color__background": "#121212",
+        "color__surface": "#222222",
+        "color__plot_bg": "#333333",
+        "map__mapbox_style": "carto-darkmatter",
     },
     "tight": {"pad_unit": 2, "pad_pct": 0.5},
     "sparse": {"pad_unit": 8, "pad_pct": 1.5},
@@ -53,10 +57,15 @@ themes = {
 
 
 class BentoStyle:
-    def __init__(self, theme=None, layout=(12, 12)):
-        self.theme = themes["light"]
+    def __init__(self, theme="", theme_dict=None, layout=(12, 12)):
+        # Default to a light theme
+        self.theme = theme_keywords["light"]
+
+        # Passing a string assumes using theme keywords e.g. "dark flat"
         for word in theme.split(" "):
-            self.theme.update(themes.get(word, {}))
+            self.theme.update(theme_keywords.get(word, {}))
+        if theme_dict:
+            self.theme.update(dictutil.flatten(theme_dict))
 
         self.layout = {"row": layout[0], "columns": layout[1]}
 
@@ -65,14 +74,14 @@ class BentoStyle:
             "height": "100vmax",
             "textAlign": "center",
             # "fontFamily": "Verdana",
-            "color": self.theme["color"],
-            "backgroundColor": self.theme["main_color"],
+            "color": self.theme["color__on_surface"],
+            "backgroundColor": self.theme["color__background"],
         }
 
         self.page = {}
-        self.app_bar = {
+        self.appbar = {
             **elevation(self.theme["elevation"]),
-            "backgroundColor": self.theme["app_bar"],
+            "backgroundColor": self.theme["color__appbar"],
             "display": "flex",
             "flexDirection": "row",
             "justifyContent": "space-between",
@@ -114,17 +123,19 @@ class BentoStyle:
             #     "r": 40 + 4 * self.theme["pad_unit"],
             # },
             # "transition": {"duration": 500},
-            "font": {"color": self.theme["backup_color"]},
-            "yaxis": {"gridcolor": self.theme["primary"]},
-            "xaxis": {"gridcolor": self.theme["primary"]},
+            "font": {"color": self.theme["color__on_surface_secondary"]},
+            "yaxis": {"gridcolor": self.theme["color__primary"]},
+            "xaxis": {"gridcolor": self.theme["color__primary"]},
             "autosize": True,
             "hovermode": "closest",
+            "paper_bgcolor": self.theme["color__surface"],
+            "plot_bgcolor": self.theme["color__plot_bg"],
+            # For maps
+            "mapbox_style": self.theme["map__mapbox_style"],
             "geo_oceancolor": "LightBlue",
             "geo_lakecolor": "Blue",
-            "geo_landcolor": self.theme["plot_bg_color"],
-            "geo_bgcolor": self.theme["paper_color"],
-            "paper_bgcolor": self.theme["paper_color"],
-            "plot_bgcolor": self.theme["plot_bg_color"],
+            "geo_landcolor": self.theme["color__plot_bg"],
+            "geo_bgcolor": self.theme["color__surface"],
         }
 
         self.trace = {}
@@ -132,7 +143,7 @@ class BentoStyle:
         # Smaller scale objects: Paper > Bar > Block
         self.paper = {
             **elevation(self.theme["elevation"]),
-            "backgroundColor": self.theme["paper_color"],
+            "backgroundColor": self.theme["color__surface"],
             "textAlign": "center",
             "display": "flex",
             "flexDirection": "column",

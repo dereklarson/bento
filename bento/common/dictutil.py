@@ -1,13 +1,15 @@
 import re
 
+from bento.common import logutil  # noqa
 from bento.common.logger import fancy_logger
 
 logging = fancy_logger(__name__)
 
 
-# Destructures a dictionary (vaguely like ES6 for JS)
-# NOTE Results are SORTED by key alphabetically, so you must sort your receiving vars
 def pluck(input_dictionary):
+    """Destructures a dictionary (vaguely like ES6 for JS)
+       Results are SORTED by key alphabetically! You must sort your receiving vars
+    """
     items = sorted(input_dictionary.items())
     return [item[1] for item in items]
 
@@ -29,14 +31,21 @@ def extract(regex, input_dictionary, unique=False, pop=True):
     method = "pop" if pop else "get"
     match_keys = [key for key in input_dictionary if re.search(regex, key)]
     output = {key: getattr(input_dictionary, method)(key) for key in match_keys}
+    return output
 
-    if unique and len(match_keys) != 1:
-        logging.warning(f"Unique extraction of {regex} failed: got {len(match_keys)}")
+
+def extract_unique(regex, input_dictionary, pop=True, default=None):
+    method = "pop" if pop else "get"
+    match_keys = [key for key in input_dictionary if re.search(regex, key)]
+    output = {key: getattr(input_dictionary, method)(key) for key in match_keys}
+
+    if len(match_keys) > 1:
+        logging.warning(f"Regex {regex} not unique: {len(match_keys)} matches")
         logging.warning(input_dictionary)
-    elif unique:
-        return pluck(output)[0]
+    elif len(match_keys) == 0:
+        return default
     else:
-        return output
+        return pluck(output)[0]
 
 
 def extract_path(path, input_dictionary):
@@ -61,6 +70,45 @@ def merge(d_base, d_in, loc=None):
         else:
             d_base[key] = d_in[key]
     return d_base
+
+
+# @logutil.loginfo()
+def flatten(dict_in, delim="__", loc=[]):
+    """Un-nests the dict by combining keys, e.g. {'a': {'b': 1}} -> {'a_b': 1}"""
+    loc = loc or []
+    output = {}
+    if not dict_in and loc:
+        output[delim.join(loc)] = {}
+    for key in dict_in:
+        if isinstance(dict_in[key], dict):
+            nest_out = flatten(dict_in[key], delim=delim, loc=loc + [str(key)])
+            output.update(nest_out)
+        else:
+            base_key = delim.join(loc + [str(key)])
+            output[base_key] = dict_in[key]
+    return output
+
+
+def nest(dict_in, delim="__"):
+    """Nests the input dict by splitting keys (opposite of flatten above)"""
+    # We will loop through all keys first, and keep track of any first-level keys
+    # that will require a recursive nest call. 'renest' stores these keys
+    output, renest = {}, []
+    for key in dict_in:
+        if delim not in key:
+            output[key] = dict_in[key]
+            continue
+        loc = key.split(delim, 1)
+        if loc[0] not in output:
+            output[loc[0]] = {}
+            # Uniquely add the key to the subdictionary we want to renest
+            renest.append(loc[0])
+        output[loc[0]][loc[1]] = dict_in[key]
+
+    # Renest all higher-level dictionaries
+    for renest_key in renest:
+        output[renest_key] = nest(output[renest_key])
+    return output
 
 
 def common_keys(dict_a, dict_b):

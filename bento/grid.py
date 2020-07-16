@@ -5,7 +5,7 @@ from bento.common import logger, logutil  # noqa
 logging = logger.fancy_logger(__name__, level=10)
 
 
-# @logutil.loginfo(logger=logging)
+# @logutil.loginfo(level='debug')
 def apply_grid(page):
     gridsize = {"width": 12, "height": 8, "rowstart": 1}
     if page.get("sidebar"):
@@ -32,7 +32,7 @@ def _rescale_ref(ref_sizes, grid_width=12, def_width=12):
     return new_sizes
 
 
-# @logutil.loginfo(logger=logging)
+# @logutil.loginfo(level='debug')
 def arrange(banks, arrangement, grid):
     """Receives an ordered 2-d matrix of items and calculates default positions"""
     # Simply stack banks if there's no other info
@@ -73,7 +73,7 @@ def arrange(banks, arrangement, grid):
     return arrangement, banks_out
 
 
-# @logutil.loginfo(logger=logging)
+# @logutil.loginfo(level='debug')
 def appease(banks, row, grid):
     """Trims rows until they fit inside the grid, if possible"""
     # Add up the total width allocated for the row

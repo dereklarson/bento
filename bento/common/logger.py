@@ -48,7 +48,7 @@ def_level_color = {
 # We never truly want infinite output, 1000 lines is probably enough
 config = {
     "DEBUG": {"max_lines": 1000},
-    "INFO": {"max_lines": 50},
+    "INFO": {"max_lines": 10},
     "default": {"max_lines": 50},
 }
 
@@ -59,16 +59,24 @@ formats = {
 }
 
 
-schemas = {"default": {"INFO": "simple", "default": "full"}}
+# The default schema uses simpler logging for info-level logs, as these are
+# intended for consumption at all times (non-debugging)
+schemas = {
+    "default": {"INFO": "simple", "default": "full"},
+}
 
 
 class FancyFormatter(logging.Formatter):
     """Adds colors and structure to a log output"""
 
     def __init__(self, schema="default", fmt=None, level_color=None):
+        # The schema will have level-dependent format strings
         self.schema = schemas.get(schema, schemas["default"])
-        # This will override a schema if set
+
+        # Overrides a schema with a constant log message format
         self.fmt = fmt
+
+        # Level colors can also be overridden, if desired
         self.level_color = level_color or def_level_color
         self.color_map = def_color_map
 
@@ -87,22 +95,27 @@ class FancyFormatter(logging.Formatter):
 
     def format(self, record):
         """Automatically called when logging a record"""
+        # Allows modification of the record attributes
         record_dict = vars(record)
-        # Identify an overall style to use, first checking a simple fmt definition
-        style = self.fmt
+
+        # Checks for message format in order:  from message, self.fmt, self.schema
+        style = record_dict.get("fmt") or self.fmt
         if not style:
             style = self.schema.get(record.levelname, self.schema["default"])
-        curr_conf = config.get(record.levelname, config["default"])
+
         # Prepare a pretty version of the message
+        curr_conf = config.get(record.levelname, config["default"])
         pretty = pprint.pformat(record_dict["msg"]).strip("'\"")
         total_lines = pretty.count("\n")
         if total_lines > curr_conf["max_lines"]:
             lines = pretty.splitlines()
             # TODO Abstract away the lines left after truncation (e.g. the 2's and 4)
-            trunc = total_lines - 4
-            pretty = "\n".join(lines[:2] + [f"...truncated {trunc} lines"] + lines[-2:])
+            trunc = total_lines - 6
+            pretty = "\n".join(lines[:3] + [f"...truncated {trunc} lines"] + lines[-3:])
         record_dict["level_str"] = self.level_fmt(record.levelname)
         record_dict["msg"] = pretty
+
+        # Shortcut characters for adding extra color
         if record_dict["msg"].startswith("%"):
             record_dict["msg"] = self.color_text(record_dict["msg"][1:], "purple")
         message = formats[style].format(**record_dict)

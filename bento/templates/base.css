@@ -1,3 +1,6 @@
+/* This file is mostly static css that should get delivered alongside a generated
+ * bento dashboard application */
+
 /* This helps ensure no extra space is present around your content
    (Notably, a white margin around the page when using a dark theme) */
 body {

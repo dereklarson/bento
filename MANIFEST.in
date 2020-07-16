@@ -1,5 +1,6 @@
 include README.md
 include LICENSE
 include requires-*.txt
-include bento/assets/*.css
+include bento/templates/*.css
 include bento/assets/*.csv
+include bento/assets/*.json

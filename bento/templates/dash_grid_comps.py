@@ -21,13 +21,14 @@ import {{entry['module']}} as {{dataid}}_data
 
 logging = logger.fancy_logger(__name__)
 
+logging.info("Creating the Dash application...")
 app = dash.Dash("{{name}}")
-
 
 # Need to suppress this for multi-page apps
 app.config.suppress_callback_exceptions = True
 
 # This should contain any non-interactive data prep required
+logging.info("Loading the application data frames...")
 data = {
     {% for dataid, entry in data.items() %}
     "{{dataid}}": {{dataid}}_data.{{entry['call']}}(**{{entry['args']}}),
@@ -35,18 +36,18 @@ data = {
     }
 
 # Supported themes: light, dark, ...
-classes = BentoStyle(theme="{{theme}}")
+classes = BentoStyle(theme="{{theme}}", theme_dict={{theme_dict}})
 
 # --- Layout ---
-# Top-level: A main div containing the title and page links
+# Top-level: A main div containing two children: appbar and page content
 main_children = [
   dcc.Location(id="location", refresh=False),
   html.Div(
     [
       html.Div([
-        html.H1("{{main.title}}", id='title', style=classes.h1),
-      {% if main.subtitle %}
-        html.H3("{{main.subtitle}}", id='subtitle', style=classes.h3),
+        html.H1("{{appbar.title}}", id='title', style=classes.h1),
+      {% if appbar.subtitle %}
+        html.H3("{{appbar.subtitle}}", id='subtitle', style=classes.h3),
       {% endif %}
       ], style=classes.titles),
       {% if pages|length > 1 %}
@@ -59,7 +60,7 @@ main_children = [
         {% endfor %}
           ], style=classes.link_set),
       {% endif %}
-      ], style=classes.app_bar),
+      ], style=classes.appbar),
   html.Div(id="page", style=classes.page),
   ]
 app.layout = html.Div(children=main_children, id="main", style=classes.main)
@@ -136,8 +137,8 @@ page_context = {
 def update_title(*args):
     # Presumes only a simple url is passed in, probably enough for a template
     page_id = args[0].replace("/", "") if args[0] else "default"
-    title = page_context.get(page_id, {}).get("title") or "{{main.title}}"
-    subtitle = page_context.get(page_id, {}).get("subtitle") or "{{main.subtitle}}"
+    title = page_context.get(page_id, {}).get("title") or "{{appbar.title}}"
+    subtitle = page_context.get(page_id, {}).get("subtitle") or "{{appbar.subtitle}}"
     return title, subtitle
 
 {% for uid, conn in connectors.items() %}
@@ -160,5 +161,5 @@ def {{callbacks[uid].name}}(*args):
 {% endfor %}
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
 

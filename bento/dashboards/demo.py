@@ -13,7 +13,7 @@ mars_page = {
                     {
                         "args": {
                             "y_column": "population",
-                            "fixed_filters": [("or", "date", ["2149-04-21"])],
+                            "fixed_filters": {"or": {"date": ["2149-04-21"]}},
                         }
                     }
                 ]
@@ -65,7 +65,7 @@ covid_page = {
             "args": {"components": [{"args": {"y_column": "cases"}}]},
         },
         "date": {"type": "date_picker"},
-        "top10": {"type": "ranking", "args": {}},
+        "top10": {"type": "ranking", "args": {"key": "state", "column": "cases"}},
         "mapsettings": {
             "type": "option_set",
             "args": {
@@ -78,11 +78,6 @@ covid_page = {
                 ]
             },
         },
-        # "trend": {
-        #     "type": "graph",
-        #     "width": 6,
-        #     "args": {"height": "350px", "x_column": "date", "y_column": "cases"},
-        # },
         "countymap": {
             "type": "graph",
             "width": 7,
@@ -165,7 +160,6 @@ svm_page = {
         },
         "heatmap": {"type": "graph"},
     },
-    # "layout": [["selector", "data_settings"], ["heatmap"]],
     "layout": [["heatmap"]],
     "sidebar": ["selector", "data_settings"],
     "connections": {"data_settings": {"heatmap"}, "selector": {"heatmap"},},
@@ -185,15 +179,13 @@ data_page = {
 
 descriptor = {
     "name": "demo",
-    # "theme": "dark flat sparse",
     "theme": "dark",
-    "main": {"title": "Bento Demo", "subtitle": "A gallery of Dash recreations"},
+    "appbar": {"title": "Bento Demo", "subtitle": "A gallery of Dash recreations"},
     "data": {
         "covid": {"module": "bento.examples.covid"},
         "mars": {"module": "bento.examples.mars"},
         "oil": {"module": "bento.examples.oil"},
         "stock": {"module": "bento.examples.stock"},
-        # "svm": {"module": "bento.examples.svm"},
     },
     "pages": {
         "covid": covid_page,
@@ -201,7 +193,6 @@ descriptor = {
         "mars": mars_page,
         "stock": stock_page,
         "data": data_page,
-        # "svm": svm_page,
     },
 }
 
@@ -210,4 +201,5 @@ if __name__ == "__main__":
     from bento import bento
 
     app_def = bento.Bento(descriptor)
-    app_def.write("cache/shared/active/generated.py")
+    app_def.write_css()
+    app_def.write("bento_app.py")

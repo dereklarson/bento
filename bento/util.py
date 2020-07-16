@@ -3,6 +3,7 @@ import numpy as np
 import math
 import plotly.express as px
 
+from collections import defaultdict
 from bento.common import logger, logutil, dictutil  # noqa
 
 logging = logger.fancy_logger(__name__)
@@ -31,54 +32,75 @@ def get_unit(num):
         return num, ""
 
 
-# @logutil.loginfo(logger=logging)
-def prepare_transforms(inputs):
+# @logutil.loginfo(level="debug")
+def prepare_transforms(inputs, dep_var="y"):
     transforms = []
+    dep_column = dictutil.extract_unique(f"{dep_var}_column", inputs, pop=False)
     for key, value in dictutil.extract("_transform", inputs, pop=False).items():
         if not value:
             continue
         if "window" in key:
-            y_column = dictutil.extract("y_column", inputs, pop=False, unique=True)
-            transforms.append((y_column, ["rolling", "mean"], [(value,), ()]))
+            transforms.append((dep_column, ["rolling", "mean"], [(value,), ()]))
+        elif "calc" in key:
+            if value == "Diff":
+                transforms.append((dep_column, ["diff"], [()]))
+            elif value == "Acceleration":
+                transforms.append((dep_column, ["diff", "diff"], [(), ()]))
+            elif value == "Cumulative":
+                transforms.append((dep_column, ["cumsum"], [()]))
+        elif "norm" in key:
+            if value == "Max":
+                transforms.append((dep_column, ["div"], [("trace.max",)]))
+            elif value == "Other Series":
+                transforms.append((dep_column, ["div"], [("ref.0",)]))
+
     return transforms
 
 
-# @logutil.loginfo(logger=logging)
+# @logutil.loginfo(level="debug")
 def prepare_filters(inputs):
-    filters = []
+    filters = defaultdict(lambda: defaultdict(list))
+    logic = dictutil.extract_unique("filter_logic", inputs, default="or").lower()
     for key, values in dictutil.extract("_filter", inputs, pop=False).items():
+        col = key.replace("_filter", "")
         if not values:
             continue
         if not isinstance(values, list):
             values = [values]
         if "date" in key and len(values) == 2:
-            filters += [("between", key.replace("_filter", ""), values)]
+            filters["between"][col].extend(values)
         else:
-            filters += [("or", key.replace("_filter", ""), values)]
+            filters[logic][col].extend(values)
     return filters
 
 
-# @logutil.loginfo(logger=logging)
+# NOTE Currently used for pie charts and ranking
+# @logutil.loginfo(level='debug')
 def filter_df(idf, filters):
     odf = idf
-    for logic, column, values in sorted(filters):
-        if "datetime" in str(type(values[0])):
-            values = [np.datetime64(item) for item in values]
-        if logic == "between":
-            odf = odf[(odf[column] >= values[0]) & (odf[column] <= values[1])]
-        elif logic == "or":
-            odf = odf[odf[column].isin(values)]
+    for logic, columns in filters.items():
+        for column, values in columns.items():
+            if "datetime" in str(type(values[0])):
+                values = [np.datetime64(item) for item in values]
+            if logic == "between":
+                odf = odf[(odf[column] >= values[0]) & (odf[column] <= values[1])]
+            elif logic == "or":
+                odf = odf[odf[column].isin(values)]
+            elif logic == "and":
+                odf = odf[odf[column].isin(values)]
 
     return odf
 
 
-def rank(idf, count, key, column):
+def rank(idf, key, column, count=10, **kwargs):
     fdf = idf.groupby([key]).sum().reset_index()
     fdf = fdf.nlargest(count, column)
     return zip(fdf[key], fdf[column])
 
 
-# @logutil.loginfo(logger=logging)
+# NOTE Used for preparing the traces for graphs
+# TODO Should combine this with filter_df/
+# @logutil.loginfo(level='debug')
 def prepare_traces(idf, filters):
     # NOTE Brought over from figure callback, default multi-column approach
     # TODO Figure out how to determine default columns from df
@@ -88,28 +110,48 @@ def prepare_traces(idf, filters):
     idf["label"] = ""
     idf.name = ""
     traces = [idf]
-    for logic, column, values in sorted(filters):
+    for logic, columns in filters.items():
         new_traces = []
         if logic == "between":
-            for df in traces:
-                new = df[(df[column] >= values[0]) & (df[column] <= values[1])]
-                new.name = ""
-                new_traces.append(new)
-        elif logic == "or":
-            for df in traces:
-                for value in values:
-                    new = df[df[column] == value]
-                    try:
-                        new["label"] += " " + new[column]
-                    except Exception:
-                        logging.warning(f"Can't add {column} to label")
-                    new.name = df.name + " " + value
+            for column, values in columns.items():
+                for df in traces:
+                    new = df[(df[column] >= values[0]) & (df[column] <= values[1])]
+                    new.name = df.name
                     new_traces.append(new)
+        elif logic == "or":
+            for column, values in columns.items():
+                for df in traces:
+                    for value in values:
+                        new = df[df[column] == value]
+                        new.name = df.name
+                        try:
+                            new.name += " " + value
+                        except Exception:
+                            # try:
+                            new.name += " " + pd.to_datetime(value).strftime("%Y-%m-%d")
+                            # except Exception:
+                            #     logging.warning(f"Can't add {column} to trace name")
+                        new_traces.append(new)
+        elif logic == "and":
+            for column, values in columns.items():
+                for df in traces:
+                    for value in values:
+                        new = df[df[column] == value]
+                        new.name = df.name
+                        try:
+                            new.name += " " + value
+                        except Exception:
+                            # try:
+                            new.name += " " + pd.to_datetime(value).strftime("%Y-%m-%d")
+                            # except Exception:
+                            #     logging.warning(f"Can't add {column} to trace name")
+                        new_traces.append(new)
+
         traces = new_traces
 
     new_traces = []
     for df in traces:
-        new = df.groupby(["date", "label"]).sum().reset_index()
+        new = df.groupby(["date"]).sum().reset_index()
         new.name = df.name
         new_traces.append(new)
     traces = new_traces
@@ -117,20 +159,30 @@ def prepare_traces(idf, filters):
     return traces
 
 
-# @logutil.loginfo(logger=logging)
+# @logutil.loginfo(level="debug")
 def trace_analytics(traces, transforms):
     for transform in transforms:
         column, operations, arg_list = transform
         for trace in traces:
             buff = trace[column]
             for op, args in zip(operations, arg_list):
-                buff = getattr(buff, op)(*args)
+                final_args = []
+                for arg in args:
+                    if "trace" in str(arg):
+                        oper = arg.split(".")[-1]
+                        final_args.append(getattr(buff, oper)())
+                    elif "ref" in str(arg):
+                        idx = 0
+                        final_args.append(traces[idx][column])
+                    else:
+                        final_args.append(arg)
+                buff = getattr(buff, op)(*final_args)
             trace[column] = buff
     return traces
 
 
 def aggregate(idf, y_column=None, filters=[], logic="sum", **kwargs):
-    filters += kwargs.get("fixed_filters", [])
+    filters.update(kwargs.get("fixed_filters", {}))
     traces = prepare_traces(idf, filters)
     agg_df = pd.concat(traces)
     if not y_column:
@@ -172,6 +224,7 @@ def gen_options(option_input):
             return option_input
         option_list = option_input["options"]
         default = option_input.get("default", option_list[0])
+    # TODO Can we determine when we should run desnake on the entries?
     options = [{"label": desnake(item).title(), "value": item} for item in option_list]
     return {"options": options, "value": default}
 
@@ -192,7 +245,7 @@ def log_color_scale(name, base=2.718, category="sequential"):
     return log_sequence
 
 
-# @logutil.loginfo(logger=logging)
+# @logutil.loginfo(level='debug')
 def data_range(pd_df_list, column, scale="category"):
     minimum = pd_df_list[0][column].min()
     maximum = pd_df_list[0][column].max()

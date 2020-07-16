@@ -11,10 +11,6 @@ from bento import util as butil
 logging = logger.fancy_logger(__name__)
 
 
-def bid(gid):
-    return f"{gid['pageid']}/{gid['bankid']}"
-
-
 class BentoBanks:
     def __init__(self, data):
         self.data = data
@@ -25,7 +21,7 @@ class BentoBanks:
 
         self.connectors = {}
 
-    # @logutil.logdebug
+    # @logutil.loginfo(level='debug')
     def _align(self, blocks, vertical, block_size):
         if vertical:
             layout = np.vstack(blocks)
@@ -46,7 +42,7 @@ class BentoBanks:
 
         return layout, sizing
 
-    # @logutil.logdebug
+    # @logutil.loginfo(level='debug')
     def axis_controls(
         self, gid, dataid, use=("x", "y"), scale=True, vertical=False, **kwargs
     ):
@@ -84,7 +80,7 @@ class BentoBanks:
             callback_name = f"{gid['pageid']}_{gid['bankid']}__update_{axis}_radio"
             callback_code = f"""
                 inputs = dictutil.process_inputs(dash.callback_context.inputs)
-                column = dictutil.extract("_column", inputs, unique=True)
+                column = dictutil.extract_unique("_column", inputs)
                 col_type = data["{dataid}"]['types'].get(column, 'all')
                 options = ["linear", "log", "date"]
                 if col_type in (float, int):
@@ -106,33 +102,42 @@ class BentoBanks:
         block_size = {"ideal": [1, 2], "min": [1, 1]}
         return self._align(blocks, vertical, block_size)
 
-    def analytics(self, gid, dataid, columns, normalize=True, vertical=False, **kwargs):
+    # TODO In Progress
+    def analytics_set(
+        self, gid, dataid, normalize=True, calculus=True, vertical=False, **kwargs
+    ):
         blocks = []
         if normalize:
-            df = self.data[dataid]["df"]
-            default = (
-                "date" if "date" in df.columns else self.data[dataid]["columns"][0]
-            )
-            column = default
-            id_dict = {"name": f"{column}_datestart", **gid}
-            series = np.sort(df[column].unique().astype(int))
-            label = f"Normalize from:".title()
-            slider_id, slider = bc.slider(id_dict, series, label)
-            self.outputs[slider_id] = "value"
-            blocks.append([[slider]])
-
-        columns = columns or self.data[dataid]["keys"]
-        for col in columns:
-            id_dict = {"name": f"{col}_compare", **gid}
-            label = f"Benchmark Against:".title()
+            id_dict = {"name": f"norm_transform", **gid}
+            label = f"Normalize by:".title()
             options = {
-                "options": list(self.data[dataid]["df"][col].unique()),
-                "default": [],
+                "options": ["None", "Max", "Other Series"],
+                "default": "None",
             }
-            kwargs = {**kwargs}
             drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
             self.outputs[drop_id] = "value"
             blocks.append([[dropdown]])
+
+        if calculus:
+            id_dict = {"name": f"calc_transform", **gid}
+            label = f"Calculus (differential, cumulative):".title()
+            options = {
+                "options": ["Acceleration", "Diff", "None", "Cumulative"],
+                "default": "None",
+            }
+            drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
+            self.outputs[drop_id] = "value"
+            blocks.append([[dropdown]])
+
+            # default = (
+            #     "date" if "date" in df.columns else self.data[dataid]["columns"][0]
+            # )
+            # column = default
+            # id_dict = {"name": f"{column}_datestart", **gid}
+            # series = np.sort(df[column].unique().astype(int))
+            # slider_id, slider = bc.slider(id_dict, series, label)
+            # self.outputs[slider_id] = "value"
+            # blocks.append([[slider]])
 
         block_size = {"ideal": [2, 3], "min": [1, 2]}
         return self._align(blocks, vertical, block_size)
@@ -157,6 +162,30 @@ class BentoBanks:
 
         blocks = [[[slider]]]
         block_size = {"ideal": [2, 4], "min": [1, 2]}
+        return self._align(blocks, vertical, block_size)
+
+    def date_combo(
+        self, gid, dataid, column=None, variant="single", vertical=False, **kwargs
+    ):
+        df = self.data[dataid]["df"]
+        default = "date" if "date" in df.columns else self.data[dataid]["columns"][0]
+        column = column or default
+        series = np.unique(df[column].dt.to_pydatetime())
+        sl_series = np.unique(df[column])
+        if variant == "single":
+            id_dict = {"name": f"{column}_picker", **gid}
+            label = f"Select {column}:"
+            picker_id, picker = bc.date_picker(id_dict, series, label, variant=variant)
+            id_dict = {"name": f"{column}_filter", **gid}
+            slider_id, slider = bc.slider(id_dict, sl_series, None, marks=False)
+        elif variant == "range":
+            label = f"Select range of {column}:"
+            picker_id, picker = bc.date_picker(id_dict, series, label)
+        # self.outputs[picker_id] = "date"
+        self.outputs[slider_id] = "value"
+
+        blocks = [[[picker], [slider]]]
+        block_size = {"ideal": [2, 2], "min": [1, 1]}
         return self._align(blocks, vertical, block_size)
 
     def date_picker(
@@ -209,9 +238,9 @@ class BentoBanks:
         block_size = {"ideal": [2, 1.5], "min": [1, 1]}
         return self._align(blocks, vertical, block_size)
 
-    def ranking(self, gid, dataid, key="state", column="cases", count=10, **kwargs):
-        id_dict = {"name": f"{column}_ranking", **gid}
-        label = f"Top {count} {key} by {column}"
+    def ranking(self, gid, dataid, **kwargs):
+        id_dict = {"name": f"ranking", **gid}
+        label = f"Top items"
         kwargs = {"Div.style": {"textAlign": "left"}, **kwargs}
         div_id, div = bc.div(id_dict, label=label, **kwargs)
 
@@ -219,12 +248,18 @@ class BentoBanks:
         callback_code = f"""
             idf = data["{dataid}"]["df"]
             inputs = dictutil.process_inputs(dash.callback_context.inputs)
+
             filters = butil.prepare_filters(inputs)
             fdf = butil.filter_df(idf, filters=filters)
             children = []
-            for item in butil.rank(fdf, {count}, "{key}", "{column}"):
-                # text = [html.H5(item[0]), html.H6(item[1])]
-                text = f"{{item[1]}} {{item[0]}}"
+
+            column = dictutil.extract_unique("_column", inputs)
+            key = dictutil.extract_unique("geo", inputs)
+            inputs.update({{"key": key, "column": column}})
+            inputs.update({kwargs})
+
+            for item in butil.rank(fdf, **inputs):
+                text = f"{{item[1]}}     {{item[0]}}"
                 children.extend([html.Span(text), html.Hr()])
             return children
             """
@@ -249,10 +284,19 @@ class BentoBanks:
                 "options": list(self.data[dataid]["df"][col].unique()),
                 "default": [],
             }
-            kwargs = {"Dropdown.multi": True, **kwargs}
-            drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
+            cargs = {"Dropdown.multi": True, **kwargs}
+            drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **cargs)
             self.outputs[drop_id] = "value"
             blocks.append([[dropdown]])
+
+        # TODO Implement logical combinations once analytics treatment finished
+        # if len(columns) >= 2:
+        #     id_dict = {"name": f"filter_logic", **gid}
+        #     cargs = {"Dropdown.clearable": False, **kwargs}
+        #     options = {"options": ["And", "Or"], "default": "Or"}
+        #     drop_id, dropdown = bc.dropdown(id_dict, options, label=None, **cargs)
+        #     self.outputs[drop_id] = "value"
+        #     blocks.append([[dropdown]])
 
         block_size = {"ideal": [2, 3], "min": [1, 2]}
         return self._align(blocks, vertical, block_size)
@@ -264,13 +308,14 @@ class BentoBanks:
             label = comp["label"]
             # Default to dropdown
             ctype = bc.dropdown
+            kwargs = {"Dropdown.clearable": False, **kwargs}
             options = comp["options"]
             if isinstance(comp["options"], str) and len(comp["options"] <= 3):
                 ctype = bc.radio
             elif isinstance(comp["options"][0], (int, float)):
                 ctype = bc.slider
                 options = pd.Series(comp["options"])
-            cid, optcomp = ctype(id_dict, options, label=label, marks=True)
+            cid, optcomp = ctype(id_dict, options, label=label, marks=True, **kwargs)
             blocks.append([[optcomp]])
             self.outputs[cid] = "value"
 
@@ -341,7 +386,7 @@ class BentoBanks:
             callback_name = f"{gid['pageid']}_{gid['bankid']}__update_mode"
             callback_code = f"""
                 inputs = dictutil.process_inputs(dash.callback_context.inputs)
-                variant = dictutil.extract("variant", inputs, unique=True)
+                variant = dictutil.extract_unique("variant", inputs)
                 options = ["lines+markers", "lines", "markers"]
                 if variant == "bar":
                     options = ["group", "stack", "relative"]
@@ -374,9 +419,11 @@ class BentoBanks:
     def data_table(self, gid, dataid, vertical=True, **kwargs):
         id_dict = {"name": "columns", **gid}
         label = f"{dataid.upper()}: Choose Columns To Show"
+        option_args = dictutil.extract(r"^options$|^default$", kwargs)
         options = {
             "options": self.data[dataid]["columns"] + self.data[dataid]["keys"],
             "default": self.data[dataid]["columns"][:3],
+            **option_args,
         }
         kwargs = {"Dropdown.multi": True}
         drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
@@ -399,7 +446,7 @@ class BentoBanks:
 
             # Override the default inputs with anything from the callback
             inputs.update(dictutil.process_inputs(dash.callback_context.inputs))
-            dropdown_cols = dictutil.extract("columns", inputs, unique=True)
+            dropdown_cols = dictutil.extract_unique("columns", inputs)
 
             # Use only first 1000 rows for performance
             fdf = fdf[:1000]
@@ -417,9 +464,16 @@ class BentoBanks:
         blocks = [[[dropdown], [datatable]]]
         return self._align(blocks, vertical, block_size)
 
+    # @logutil.loginfo(level='debug')
     def graph(self, gid, dataid, category="normal", vertical=False, **kwargs):
         id_dict = {"name": "graph", **gid}
         cid, component = bc.graph(id_dict, **kwargs)
+
+        # Set dependent variable based on the type of graph
+        if category == "map":
+            dep_var = "z"
+        else:
+            dep_var = "y"
 
         callback_name = f"{gid['pageid']}_{gid['bankid']}__update_figure"
         callback_code = f"""
@@ -436,7 +490,7 @@ class BentoBanks:
             inputs.update({kwargs})
 
             filters = butil.prepare_filters(inputs)
-            transforms = butil.prepare_transforms(inputs)
+            transforms = butil.prepare_transforms(inputs, dep_var="{dep_var}")
             figure = Graph.{category}(fdf,
                 filters=filters,
                 transforms=transforms,
