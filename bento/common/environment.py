@@ -18,6 +18,7 @@ class ENV_SPEC:
     # Generic
     DEV: bool = False
     HOME: str = "."
+    APP: str = ""
     APP_HOME: str = "."
 
     # Organization configuration

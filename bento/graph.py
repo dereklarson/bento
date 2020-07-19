@@ -165,10 +165,17 @@ class Graph:
                 geo = "us_states"
                 pdf.loc[:, "fips"] = pdf["fips"].astype(str).str.slice(0, 2)
                 pdf = pdf.groupby(["fips", "state"]).sum().reset_index()
+                loc_column = "fips"
                 text = pdf["state"]
             elif "count" in geo:
                 geo = "us_counties"
+                loc_column = "fips"
                 text = pdf["county"]
+            elif "world" in geo:
+                geo = "world"
+                loc_column = "alpha3"
+                text = pdf["country"]
+
             ht_title = "<b>%{text}</b>"
             ht_info = f"{z_column.title()}: %{{z:d}}"
             hovertemplate = "<br>".join([ht_title, ht_info])
@@ -177,7 +184,7 @@ class Graph:
                 "z": pdf[z_column],
                 "geojson": geojson[geo],
                 "text": text,
-                "locations": pdf["fips"],
+                "locations": pdf[loc_column],
                 "marker_line_width": marker_line_width,
                 "marker_line_color": marker_line_color,
                 "colorscale": butil.log_color_scale("Viridis", base=3),
@@ -192,6 +199,9 @@ class Graph:
             if "us" in geo:
                 mapbox_center = {"lat": 37.0902, "lon": -95.7129}
                 mapbox_zoom = 3
+            elif "world" in geo:
+                mapbox_center = {"lat": 0, "lon": 0}
+                mapbox_zoom = 1
         elif mapbox_center == "auto":
             if variant == "scatter":
                 ref_lat, ref_lon, ref_zoom = 25, 60, 3

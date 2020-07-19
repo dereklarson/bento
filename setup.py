@@ -14,7 +14,7 @@ def requires(req_mode):
 
 setup(
     name="bento-dash",
-    version="0.1.1",
+    version="0.1.4",
     description="Create Plotly Dash apps from a template",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -37,7 +37,7 @@ setup(
         "bento.common",
         "bento.common.scrub",
         "bento.dashboards",
-        "bento.examples",
+        "bento.sample_data",
         "bento.templates",
     ],
     include_package_data=True,
