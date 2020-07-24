@@ -182,10 +182,10 @@ descriptor = {
     "theme": "dark",
     "appbar": {"title": "Bento Demo", "subtitle": "A gallery of Dash recreations"},
     "data": {
-        "covid": {"module": "bento.examples.covid"},
-        "mars": {"module": "bento.examples.mars"},
-        "oil": {"module": "bento.examples.oil"},
-        "stock": {"module": "bento.examples.stock"},
+        "covid": {"module": "bento.sample_data.covid"},
+        "mars": {"module": "bento.sample_data.mars"},
+        "oil": {"module": "bento.sample_data.oil"},
+        "stock": {"module": "bento.sample_data.stock"},
     },
     "pages": {
         "covid": covid_page,
