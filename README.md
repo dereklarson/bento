@@ -5,6 +5,8 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/dereklarson/bento.svg?style=for-the-badge)](https://lgtm.com/projects/g/dereklarson/bento/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/dereklarson/bento.svg?style=for-the-badge)](https://lgtm.com/projects/g/dereklarson/bento/alerts/)
 
+![Bento Example](bento_example.gif)
+
 Create Plotly Dash apps via a template
 
 ## Quickstart
