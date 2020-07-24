@@ -50,6 +50,8 @@ def parse_env_file(env_file: str) -> dict:
     logging.debug("Adding environment variables:")
     with open(env_file, "r") as fh:
         for line in fh:
+            if line.startswith("#"):
+                continue
             match = re.search(r"([A-Z_]+)=(.*)", line)
             try:
                 name, val = match.groups()

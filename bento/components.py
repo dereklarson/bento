@@ -12,15 +12,10 @@ from bento import util as butil
 logging = logger.fancy_logger(__name__)
 
 
-# --- The following are convenience functions ---
-# TODO merge with 'bid()' and anything else like that
-def create_component_id(id_dict, suffix=""):
-    bankid, name, pageid = dictutil.pluck(id_dict)
-    return f"{pageid}/{bankid}|{name}{suffix}"
-
-
 def _create(component_class, id_dict, args, lib="dcc", suffix="", label=None, **kwargs):
-    cid = create_component_id(id_dict, suffix=suffix)
+    """Helps wrap Dash components so they can be easily written out via Jinja2"""
+    bankid, name, pageid = dictutil.pluck(id_dict)
+    cid = f"{pageid}/{bankid}|{name}{suffix}"
     comp = {
         "lib": lib,
         "component": component_class,
@@ -28,6 +23,7 @@ def _create(component_class, id_dict, args, lib="dcc", suffix="", label=None, **
         "args": {
             "id": cid,
             **args,
+            # Allows users to supply arguments to Dash components via the descriptor
             **dictutil.extract_path(f"{component_class}.", kwargs),
         },
     }

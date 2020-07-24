@@ -70,6 +70,7 @@ class FancyFormatter(logging.Formatter):
     """Adds colors and structure to a log output"""
 
     def __init__(self, schema="default", fmt=None, level_color=None):
+        super().__init__()
         # The schema will have level-dependent format strings
         self.schema = schemas.get(schema, schemas["default"])
 

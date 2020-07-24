@@ -20,7 +20,9 @@ class Bento:
     def __init__(self, descriptor, init_only=False):
         # TODO Use theme template with self.init_theme()
         # self.template = "dash_grid_theme.py"
-        self.template = "dash_grid_comps.py"
+        self.template = "bento_v1.py.j2"
+        self.baseline_template = "baseline.css.j2"
+        self.theme_template = "theme.css.j2"
 
         # Catches any problems with the input descriptor up front
         if not self.is_valid(descriptor):
@@ -292,16 +294,16 @@ class Bento:
 
         classes = style.BentoStyle(theme=self.context["theme"])
 
-        # Write base.css containing some static, general settings
-        template = jenv.get_template("base.css")
-        with open(f"{folder}/base.css", "w") as fh:
+        # Write baseline css containing some static, general settings
+        template = jenv.get_template(self.baseline_template)
+        with open(f"{folder}/baseline.css", "w") as fh:
             str_output = template.render(classes.theme)
             fh.write(str_output)
 
         logging.info(f"Wrote {folder}/base.css")
 
         # This CSS ensures all components adhere to the theme appearance
-        template = jenv.get_template("theme.css")
+        template = jenv.get_template(self.theme_template)
         with open(f"{folder}/{filename}", "w") as fh:
             str_output = template.render(classes.theme)
             fh.write(str_output)

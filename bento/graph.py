@@ -35,7 +35,13 @@ class Graph:
     ):
 
         x_label = x_label or x_column
-        y_label = y_label or y_column
+
+        if isinstance(y_column, str):
+            y_columns = [y_column]
+            y_label = y_label or y_column
+        elif isinstance(y_column, list):
+            y_columns = y_column
+            y_label = y_label or y_column[0]
 
         graph_call = getattr(go, variant.title())
 
@@ -56,33 +62,41 @@ class Graph:
             traces = butil.prepare_traces(idf, filters)
             traces = butil.trace_analytics(traces, transforms)
             for trace_df in traces:
-                default_settings = {
-                    "x": trace_df[x_column],
-                    "y": trace_df[y_column],
-                    # TODO Fix up hover info for non-map plots
-                    # "text": trace_df["hover_info"],
-                    "name": trace_df.name,
-                }
+                y_idx = 1
+                for y_column in y_columns:
+                    yaxis = f"y{y_idx}"
 
-                data_settings = {
-                    "histogram": {"x": trace_df[y_column]},
-                }
+                    default_settings = {
+                        "x": trace_df[x_column],
+                        "y": trace_df[y_column],
+                        # TODO Fix up hover info for non-map plots
+                        # "text": trace_df["hover_info"],
+                        "name": f"{trace_df.name} - {y_column.title()}",
+                    }
 
-                style_settings = {
-                    "scatter": {
-                        "opacity": opacity,
-                        "mode": mode,
-                        "line_width": line_width,
-                        "marker_size": marker_size,
-                        "marker_line_width": marker_line_width,
-                        "marker_line_color": marker_line_color,
-                    },
-                }
+                    if y_idx > 1:
+                        default_settings.update({"yaxis": yaxis})
 
-                settings = data_settings.get(variant, default_settings)
-                settings.update(style_settings.get(variant, {}))
+                    data_settings = {
+                        "histogram": {"x": trace_df[y_column]},
+                    }
 
-                fig.add_trace(graph_call(**settings))
+                    style_settings = {
+                        "scatter": {
+                            "opacity": opacity,
+                            "mode": mode,
+                            "line_width": line_width,
+                            "marker_size": marker_size,
+                            "marker_line_width": marker_line_width,
+                            "marker_line_color": marker_line_color,
+                        },
+                    }
+
+                    settings = data_settings.get(variant, default_settings)
+                    settings.update(style_settings.get(variant, {}))
+
+                    fig.add_trace(graph_call(**settings))
+                    y_idx += 1
 
         barmode = mode if mode in ["stack", "group", "relative"] else "stack"
         layout = {
@@ -97,22 +111,25 @@ class Graph:
             "legend_y": 1,
             "legend_bgcolor": "rgba(0,0,0,0)",
             "legend_font_size": 10,
-            "title": f"{butil.titlize(y_label)} vs. {butil.titlize(x_label)}",
-            "xaxis": {
-                "type": x_scale,
-                "title": butil.titlize(x_label),
-                # "range": butil.data_range(traces, x_column, x_scale),
-            },
-            "yaxis": {
-                "type": y_scale,
-                "title": butil.titlize(y_label),
-                # "range": butil.data_range(traces, y_column, y_scale),
-            },
+            "xaxis": {"type": x_scale, "title": butil.titlize(x_label)},
+            "yaxis": {"type": y_scale, "title": butil.titlize(y_label)},
         }
+
+        # TODO Temporary multi-axis support
+        for y_idx in range(1, len(y_columns)):
+            layout.update(
+                {
+                    f"yaxis{y_idx+1}": {
+                        "type": y_scale,
+                        "title": y_columns[y_idx],
+                        "overlaying": "y",
+                        "side": "right",
+                    }
+                }
+            )
 
         if variant == "pie":
             layout.update({"legend_x": 1, "legend_y": 1})
-            pass
 
         if variant == "histogram":
             layout = {

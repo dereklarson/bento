@@ -52,14 +52,16 @@ class BentoBanks:
             # Define the dropdown to select a column to display on the axis
             label = f"{axis}-Axis Data".title()
             id_dict = {"name": f"{axis}_column", **gid}
-            kwargs = {"Dropdown.clearable": False, **kwargs}
+            cargs = {"Dropdown.clearable": False, **kwargs}
+            if axis != "x":
+                cargs["Dropdown.multi"] = True
             default_idx = min(axis_idx, len(self.data[dataid]["columns"]) - 1)
             options = {
                 "options": self.data[dataid]["columns"],
                 "default": self.data[dataid]["columns"][default_idx],
                 **option_args,
             }
-            drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
+            drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **cargs)
             self.outputs[drop_id] = "value"
 
             if not scale:
@@ -77,10 +79,15 @@ class BentoBanks:
                 "outputs": [(radio_id, "options"), (radio_id, "value")],
             }
 
+            # TODO includes temporary multi-column support
             callback_name = f"{gid['pageid']}_{gid['bankid']}__update_{axis}_radio"
             callback_code = f"""
                 inputs = dictutil.process_inputs(dash.callback_context.inputs)
                 column = dictutil.extract_unique("_column", inputs)
+
+                if isinstance(column, list):
+                    column = column[0]
+
                 col_type = data["{dataid}"]['types'].get(column, 'all')
                 options = ["linear", "log", "date"]
                 if col_type in (float, int):
@@ -334,7 +341,7 @@ class BentoBanks:
         # Create the slider that sets training & prediction range
         id_dict = {"name": "fitrange", **gid}
         label = "Fit/Predict range: points to use, points to forecast"
-        cid, fit_range = bc.range_slider(gid, label)
+        cid, fit_range = bc.range_slider(id_dict, options, label=label)
         self.outputs[cid] = "value"
         blocks.append([[fit_comp], [fit_range]])
 

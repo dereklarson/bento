@@ -12,9 +12,11 @@ logging = fancy_logger(__name__)
 
 
 class FitFunc:
+    @staticmethod
     def linear(x, a, b):
         return a + b * x
 
+    @staticmethod
     def quadratic(x, a, b, c):
         return a + b * x + c * x ** 2
 

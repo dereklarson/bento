@@ -44,14 +44,14 @@ def arrange(banks, arrangement, grid):
     banks_out = []
     # Give banks a position if none is supplied
     y_step = int(grid["height"] / len(arrangement))
-    for idx, arr_row in enumerate(arrangement):
+    for y_idx, arr_row in enumerate(arrangement):
         if not arr_row:
             continue
-        curr_y = idx * y_step
+        curr_y = y_idx * y_step
         x_step = int(grid["width"] / len(arr_row))
-        for idx, bank in enumerate(arr_row):
+        for x_idx, bank in enumerate(arr_row):
             bankid = bank["bankid"]
-            curr_x = idx * x_step + grid["rowstart"]
+            curr_x = x_idx * x_step + grid["rowstart"]
             # TODO Decide here
             # ref = _rescale_ref(banks[bankid]["sizing"], grid_width=grid["width"])
             ref = banks[bankid]["sizing"]

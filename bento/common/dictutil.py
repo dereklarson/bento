@@ -127,7 +127,6 @@ class Edict(dict):
                 logging.debug(initial)
         else:
             super().__init__(initial)
-        pass
 
     def __and__(self, other):
         """Returns the first dict with only keys that overlap with the second"""

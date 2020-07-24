@@ -181,7 +181,8 @@ def trace_analytics(traces, transforms):
     return traces
 
 
-def aggregate(idf, y_column=None, filters=[], logic="sum", **kwargs):
+def aggregate(idf, y_column=None, filters=None, logic="sum", **kwargs):
+    filters = filters or {}
     filters.update(kwargs.get("fixed_filters", {}))
     traces = prepare_traces(idf, filters)
     agg_df = pd.concat(traces)
