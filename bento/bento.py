@@ -296,11 +296,12 @@ class Bento:
 
         # Write baseline css containing some static, general settings
         template = jenv.get_template(self.baseline_template)
-        with open(f"{folder}/baseline.css", "w") as fh:
+        out_file = self.baseline_template.replace(".j2", "")
+        with open(f"{folder}/{out_file}", "w") as fh:
             str_output = template.render(classes.theme)
             fh.write(str_output)
 
-        logging.info(f"Wrote {folder}/base.css")
+        logging.info(f"Wrote {folder}/{out_file}")
 
         # This CSS ensures all components adhere to the theme appearance
         template = jenv.get_template(self.theme_template)
