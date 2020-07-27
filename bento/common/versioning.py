@@ -18,7 +18,6 @@ def parse_versions(version_file: str) -> dict:
             except AttributeError:
                 logging.warning("Line doesn't match env var regex:")
                 logging.info(f"    {line}")
-                pass
     logging.debug(versions)
     return versions
 
