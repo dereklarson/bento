@@ -20,7 +20,7 @@ primary = "#f7021f"  # A Marsish red?
 # TODO Abstract primary colors away with the "50-1000" system
 theme_keywords = {
     "light": {
-        "class_name": None,
+        "class_name": "bento-theme",  # Required for dropdowns, etc.
         # Colors
         "color__primary": primary,
         "color__on_surface": dark_text,

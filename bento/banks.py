@@ -53,8 +53,11 @@ class BentoBanks:
             label = f"{axis}-Axis Data".title()
             id_dict = {"name": f"{axis}_column", **gid}
             cargs = {"Dropdown.clearable": False, **kwargs}
-            if axis != "x":
-                cargs["Dropdown.multi"] = True
+
+            # NOTE Toggle these lines for early multi-axis support
+            # if axis != "x":
+            #     cargs["Dropdown.multi"] = True
+
             default_idx = min(axis_idx, len(self.data[dataid]["columns"]) - 1)
             options = {
                 "options": self.data[dataid]["columns"],
