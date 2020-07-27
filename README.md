@@ -18,9 +18,9 @@ curve of dashboarding!
 ## Quickstart
 Dependencies: Python 3.7+
 
-Bento is currently on the test PyPI repository, and can be installed with:
+Bento is available on PyPI, and the latest version can be installed with:
 
-`pip3 install --index-url https://test.pypi.org/simple/ bento-dash==0.1.6`
+`pip3 install bento-dash`
 
 To make sure everything is working, try building the demo app:
 

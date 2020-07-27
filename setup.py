@@ -6,6 +6,13 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 
+def version():
+    _version = {}
+    with open("bento/_version.py") as fh:
+        exec(fh.read(), _version)
+        return _version["__version__"]
+
+
 def requires(req_mode):
     with open("requires-{}.txt".format(req_mode)) as fh:
         requires = [line.strip() for line in fh]
@@ -14,8 +21,8 @@ def requires(req_mode):
 
 setup(
     name="bento-dash",
-    version="0.1.6",
-    description="Create Plotly Dash apps from a template",
+    version=version(),
+    description="Create Plotly Dash apps via templates",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/dereklarson/bento",
