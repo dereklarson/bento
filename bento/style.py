@@ -1,5 +1,8 @@
 # These are CSS styles that roughly implement Material Design components
 from bento.common import dictutil
+from bento import named_themes
+
+import colorsys
 
 
 def elevation(elev):
@@ -13,59 +16,59 @@ def grid_columns(n_col, pad_pct):
     return f"repeat({n_col}, {col_size:.2f}%)"
 
 
-dark_text = "#212529"  # Default text color for a light background
-light_text = "#aaaaaa"  # Default text color for a dark background
-primary = "#f7021f"  # A Marsish red?
+def flip_color(hex_color, offset_factor=1):
+    """ Mirrors the hex color along the brightness axis, e.g #eeeeee -> #111111 """
+    if len(hex_color) != 7:
+        raise Exception(f"Color {hex_color} is not in #rrggbb format.")
+    rgb = [int(hex_color[x : x + 2], 16) for x in [1, 3, 5]]
+    hls = list(colorsys.rgb_to_hls(*rgb))
+    # Reverse the lightness level
+    hls[1] = 255 - hls[1]
+    new_rgb = colorsys.hls_to_rgb(*hls)
+    rgb2 = [min(255, max(0, int(level))) for level in new_rgb]
+    return f"#{rgb2[0]:02x}{rgb2[1]:02x}{rgb2[2]:02x}"
 
-# TODO Abstract primary colors away with the "50-1000" system
+
+def darken_color(hex_color, offset_factor=0.7):
+    """ Mirrors the hex color along the brightness axis, e.g #eeeeee -> #111111 """
+    if len(hex_color) != 7:
+        raise Exception(f"Color {hex_color} is not in #rrggbb format.")
+    rgb = [int(hex_color[x : x + 2], 16) for x in [1, 3, 5]]
+    hls = list(colorsys.rgb_to_hls(*rgb))
+    # Reduce lightness as defined by offset_factor
+    hls[1] *= offset_factor
+    new_rgb = colorsys.hls_to_rgb(*hls)
+    rgb2 = [min(255, max(0, int(level))) for level in new_rgb]
+    return f"#{rgb2[0]:02x}{rgb2[1]:02x}{rgb2[2]:02x}"
+
+
 theme_keywords = {
-    "light": {
-        "class_name": "bento-theme",  # Required for dropdowns, etc.
-        # Colors
-        "color__primary": primary,
-        "color__on_surface": dark_text,
-        "color__on_surface_secondary": dark_text,
-        # "color__appbar": "#ed4415",
-        "color__appbar": primary,
-        "color__background": "#FCFCFC",
-        "color__surface": "#F1F1F1",
-        "color__plot_bg": "#E8E9EA",
-        # Density
-        "pad_unit": 4,
-        "pad_pct": 1.0,
-        # Flatness
-        "elevation": 4,
-        # Map
-        "map__mapbox_style": "carto-positron",
-    },
-    "dark": {
-        "class_name": "bento-theme",  # Required for dropdowns, etc.
-        "color__on_surface": primary,
-        "color__on_surface_secondary": light_text,
-        "color__primary": "#8d3212",
-        "color__appbar": "#222222",
-        "color__background": "#121212",
-        "color__surface": "#222222",
-        "color__plot_bg": "#333333",
-        "map__mapbox_style": "carto-darkmatter",
-    },
-    "tight": {"pad_unit": 2, "pad_pct": 0.5},
-    "sparse": {"pad_unit": 8, "pad_pct": 1.5},
-    "loose": {"pad_unit": 16, "pad_pct": 3.0},
+    "tight": {"pad_unit": 2, "pad_pct": 0.5, "font__size": "1.3rem"},
+    "sparse": {"pad_unit": 8, "pad_pct": 1.5, "font__size": "1.7rem"},
+    "loose": {"pad_unit": 16, "pad_pct": 2.5, "font__size": "1.9rem"},
     "flat": {"elevation": 0,},
 }
 
 
 class BentoStyle:
     def __init__(self, theme="", theme_dict=None, layout=(12, 12)):
-        # Default to a light theme
-        self.theme = theme_keywords["light"]
+        # Default to the Bento theme
+        self.spec = named_themes.bento
+        self.spec["class_name"] = "bento-theme"  # Required for dropdowns, etc.
 
         # Passing a string assumes using theme keywords e.g. "dark flat"
         for word in theme.split(" "):
-            self.theme.update(theme_keywords.get(word, {}))
+            self.spec.update(theme_keywords.get(word, {}))
+            if word == "dark":
+                for key in self.spec:
+                    if "color" in key:
+                        if "primary" in key or "secondary" in key:
+                            self.spec[key] = darken_color(self.spec[key])
+                        else:
+                            self.spec[key] = flip_color(self.spec[key])
+                self.spec["map__mapbox_style"] = "carto-darkmatter"
         if theme_dict:
-            self.theme.update(dictutil.flatten(theme_dict))
+            self.spec.update(dictutil.flatten(theme_dict))
 
         self.layout = {"row": layout[0], "columns": layout[1]}
 
@@ -73,15 +76,17 @@ class BentoStyle:
         self.main = {
             "height": "100vmax",
             "textAlign": "center",
-            # "fontFamily": "Verdana",
-            "color": self.theme["color__on_surface"],
-            "backgroundColor": self.theme["color__background"],
+            "fontFamily": self.spec["font__family"],
+            "fontSize": self.spec["font__size"],
+            "color": self.spec["color__on_surface"],
+            "backgroundColor": self.spec["color__background"],
         }
 
         self.page = {}
         self.appbar = {
-            **elevation(self.theme["elevation"]),
-            "backgroundColor": self.theme["color__appbar"],
+            **elevation(self.spec["elevation"]),
+            "backgroundColor": self.spec["color__primary"],
+            "color": self.spec["color__on_primary"],
             "display": "flex",
             "flexDirection": "row",
             "justifyContent": "space-between",
@@ -92,7 +97,7 @@ class BentoStyle:
             "display": "flex",
             "flexDirection": "row",
             "margin": 0,
-            "paddingLeft": 6 * self.theme["pad_unit"],
+            "paddingLeft": 24,
             "alignSelf": "flex-start",
             "alignItems": "flex-end",
         }
@@ -104,11 +109,11 @@ class BentoStyle:
 
         self.grid = {
             "display": "grid",
-            "paddingTop": f"{self.theme['pad_pct']}%",
-            "gridGap": f"{self.theme['pad_pct']}%",
-            "rowGap": f"{self.theme['pad_pct'] * 1.4}%",
+            "paddingTop": f"{self.spec['pad_pct']}%",
+            "gridGap": f"{self.spec['pad_pct']}%",
+            "rowGap": f"{self.spec['pad_pct'] * 1.4}%",
             "gridTemplateColumns": grid_columns(
-                self.layout["columns"], self.theme["pad_pct"]
+                self.layout["columns"], self.spec["pad_pct"]
             ),
             "gridTemplateRows": "auto",
         }
@@ -117,37 +122,37 @@ class BentoStyle:
         self.graph = {
             # TODO Figure out how to add this in as additional margin?
             # "margin": {
-            #     "l": 16 + 4 * self.theme["pad_unit"],
-            #     "b": 40 + 4 * self.theme["pad_unit"],
-            #     "t": 40 + 4 * self.theme["pad_unit"],
-            #     "r": 40 + 4 * self.theme["pad_unit"],
+            #     "l": 16 + 4 * self.spec["pad_unit"],
+            #     "b": 40 + 4 * self.spec["pad_unit"],
+            #     "t": 40 + 4 * self.spec["pad_unit"],
+            #     "r": 40 + 4 * self.spec["pad_unit"],
             # },
             # "transition": {"duration": 500},
-            "font": {"color": self.theme["color__on_surface_secondary"]},
-            "yaxis": {"gridcolor": self.theme["color__primary"]},
-            "xaxis": {"gridcolor": self.theme["color__primary"]},
+            "font": {"color": self.spec["color__on_surface_secondary"]},
+            "yaxis": {"gridcolor": self.spec["color__primary"]},
+            "xaxis": {"gridcolor": self.spec["color__primary"]},
             "autosize": True,
             "hovermode": "closest",
-            "paper_bgcolor": self.theme["color__surface"],
-            "plot_bgcolor": self.theme["color__plot_bg"],
+            "paper_bgcolor": self.spec["color__surface"],
+            "plot_bgcolor": self.spec["color__plot_bg"],
             # For maps
-            "mapbox_style": self.theme["map__mapbox_style"],
+            "mapbox_style": self.spec["map__mapbox_style"],
             "geo_oceancolor": "LightBlue",
             "geo_lakecolor": "Blue",
-            "geo_landcolor": self.theme["color__plot_bg"],
-            "geo_bgcolor": self.theme["color__surface"],
+            "geo_landcolor": self.spec["color__plot_bg"],
+            "geo_bgcolor": self.spec["color__surface"],
         }
 
         self.trace = {}
 
         # Smaller scale objects: Paper > Bar > Block
         self.paper = {
-            **elevation(self.theme["elevation"]),
-            "backgroundColor": self.theme["color__surface"],
-            "textAlign": "center",
+            **elevation(self.spec["elevation"]),
+            "backgroundColor": self.spec["color__surface"],
+            # "textAlign": "center",
             "display": "flex",
             "flexDirection": "column",
-            "padding": self.theme["pad_unit"],
+            "padding": self.spec["pad_unit"],
         }
 
         self.bar = {
@@ -162,7 +167,7 @@ class BentoStyle:
             "display": "flex",
             "flexDirection": "column",
             "flexGrow": "1",
-            "padding": self.theme["pad_unit"],
+            "padding": self.spec["pad_unit"],
         }
 
         # NOTE We need an entry here for every component library, as is

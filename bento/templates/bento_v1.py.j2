@@ -36,7 +36,7 @@ data = {
     }
 
 # Supported themes: light, dark, ...
-classes = BentoStyle(theme="{{theme}}", theme_dict={{theme_dict}})
+classes = BentoStyle(theme_dict={{theme_spec}})
 
 # --- Layout ---
 # Top-level: A main div containing two children: appbar and page content
@@ -47,7 +47,7 @@ main_children = [
       html.Div([
         html.H1("{{appbar.title}}", id='title', style=classes.h1),
       {% if appbar.subtitle %}
-        html.H3("{{appbar.subtitle}}", id='subtitle', style=classes.h3),
+        html.H5("{{appbar.subtitle}}", id='subtitle', style=classes.h3),
       {% endif %}
       ], style=classes.titles),
       {% if pages|length > 1 %}
@@ -83,7 +83,7 @@ app.layout = html.Div(children=main_children, id="main", style=classes.main)
     ], 
     style={**classes.{{component.lib}}, **classes.block}),
     {% endfor %}
-  ], style=classes.bar, className=classes.theme['class_name']),
+  ], style=classes.bar, className=classes.spec['class_name']),
   {% endfor %}
 ]
 
