@@ -194,7 +194,7 @@ class Graph:
                 text = pdf["country"]
 
             ht_title = "<b>%{text}</b>"
-            ht_info = f"{z_column.title()}: %{{z:d}}"
+            ht_info = f"{z_column.title()}: %{{z:s}}"
             hovertemplate = "<br>".join([ht_title, ht_info])
             args = {
                 **base_args,

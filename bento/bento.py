@@ -45,23 +45,25 @@ class Bento:
         if init_only:
             return
 
-        logging.info("Creating the pages...")
+        logging.info("Creating the pages:")
         for pageid, page in self.desc["pages"].items():
-            logging.info(f"  {pageid}")
+            logging.info(f"#^  {pageid}...")
             self.create_page(pageid, page)
             # Specifies and attaches connectors to callbacks
             self.connect_page(page)
-            logging.info(f"  ...connected")
+            logging.info(f"#$ connected")
 
     # @logutil.loginfo(level='debug')
     def is_valid(self, descriptor):
         """Ensures a proper naming scheme is followed by the IDs"""
-        logging.info("Testing validity of input descriptor...")
+        logging.info("#^Testing validity of input descriptor...")
         validator = cerberus.Validator(schema.descriptor_schema)
         self.valid = validator.validate(descriptor)
         if not self.valid:
-            logging.warning("%...Failed")
+            logging.warning("#!\nFailed due to the following errors:")
             logging.warning(validator.errors)
+        else:
+            logging.info("#$ passed")
 
         return self.valid
 
@@ -75,7 +77,7 @@ class Bento:
          - Generates full bankid (pageid + bankname)
          - Handle most defaults here so they aren't scattered about
         """
-        logging.info("Normalizing the input descriptor...")
+        logging.info("#^Normalizing the input descriptor...")
         # TODO  Handle IDs here, perhaps with a utility class
         desc = copy.deepcopy(descriptor)
 
@@ -132,23 +134,26 @@ class Bento:
                 bank["args"]["gid"] = {"pageid": pagename, "bankid": bankname}
                 new_banks[self.bankid(pagename, bankname)] = bank
             page["banks"] = new_banks
+        logging.info("#$ done")
         return desc
 
     def process_data(self, descriptor):
-        logging.info("Loading the dataframes specified...")
+        logging.info("Loading the dataframes specified:")
         data = {}
         for dataid, entry in descriptor["data"].items():
+            logging.info(f"#^  {dataid}...")
             try:
                 data_module = importlib.import_module(entry["module"])
             except ImportError:
-                logging.warning(f"Failed to load {entry['module']}")
+                logging.warning(f"\nFailed to load {entry['module']}")
                 continue
             data[dataid] = getattr(data_module, entry["call"])(**entry["args"])
             data[dataid]["columns"] = list(data[dataid]["types"].keys())
+            logging.info("#$ done")
         return data
 
     def init_structure(self):
-        logging.info("Generating initial context object...")
+        logging.info("#^Generating initial context object...")
         # Outputs are a collection of fields provided by banks that are available
         # to be connected to other banks if the connections are provided
         # e.g. outputs + connections => connectors
@@ -193,6 +198,7 @@ class Bento:
             "connectors": connectors,
             "callbacks": callbacks,
         }
+        logging.info("#$ done")
 
     def init_theme(self):
         # TODO Currently disabled, until we can figure out how to get it to work well
@@ -268,47 +274,39 @@ class Bento:
         bank["sizing"] = sizing
         return item
 
-    def write(self, filename="generated_app.py"):
+    def write(self, app_output="bento_app.py", css_folder="assets"):
         if not self.valid:
             logging.warning("Descriptor never validated")
             return
-        # TODO Reduce templating boilerplate
+        logging.info("Writing Dash application files:")
+        self.write_template(self.context, self.template, app_output)
+
+        pathlib.Path(css_folder).mkdir(parents=True, exist_ok=True)
+        spec = style.BentoStyle(theme_dict=self.theme_spec).spec
+
+        out_file = self.baseline_template.replace(".j2", "")
+        self.write_template(spec, self.baseline_template, f"{css_folder}/{out_file}")
+
+        out_file = self.theme_template.replace(".j2", "")
+        self.write_template(spec, self.theme_template, f"{css_folder}/{out_file}")
+
+    def write_template(self, context, template, output_location):
         env_args = {"trim_blocks": True, "lstrip_blocks": True}
         jenv = Environment(loader=PackageLoader(__name__), **env_args)
-        template = jenv.get_template(self.template)
+        template = jenv.get_template(template)
+        str_output = template.render(context)
 
-        with open(filename, "w") as fh:
+        # TODO Probably harden this against leaks
+        if ".py" in output_location:
             mode = black.FileMode()
-            str_output = template.render(self.context)
             try:
-                fh.write(black.format_file_contents(str_output, fast=True, mode=mode))
+                str_output = black.format_file_contents(
+                    str_output, fast=True, mode=mode
+                )
             except Exception:
                 logging.warning("Issue using Black to format file output")
-                fh.write(str_output)
 
-        logging.info(f"Wrote {filename}")
-
-    def write_css(self, folder="assets", filename="bento_theme.css"):
-        # TODO Reduce templating boilerplate
-        env_args = {"trim_blocks": True, "lstrip_blocks": True}
-        jenv = Environment(loader=PackageLoader("bento"), **env_args)
-        pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
-
-        classes = style.BentoStyle(theme_dict=self.theme_spec)
-
-        # Write baseline css containing some static, general settings
-        template = jenv.get_template(self.baseline_template)
-        out_file = self.baseline_template.replace(".j2", "")
-        with open(f"{folder}/{out_file}", "w") as fh:
-            str_output = template.render(classes.spec)
+        with open(output_location, "w") as fh:
             fh.write(str_output)
 
-        logging.info(f"Wrote {folder}/{out_file}")
-
-        # This CSS ensures all components adhere to the theme appearance
-        template = jenv.get_template(self.theme_template)
-        with open(f"{folder}/{filename}", "w") as fh:
-            str_output = template.render(classes.spec)
-            fh.write(str_output)
-
-        logging.info(f"Wrote {folder}/{filename}")
+        logging.info(f"  wrote {output_location}")

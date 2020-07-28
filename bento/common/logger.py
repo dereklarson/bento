@@ -53,6 +53,7 @@ config = {
 }
 
 formats = {
+    "msg": "{msg}",
     "bare": "{level_str}| {msg}",
     "simple": "{level_str}| {name} | {msg}",
     "full": "{level_str}| {name} | {funcName}:{lineno} - {msg}",
@@ -70,7 +71,6 @@ class FancyFormatter(logging.Formatter):
     """Adds colors and structure to a log output"""
 
     def __init__(self, schema="default", fmt=None, level_color=None):
-        super().__init__()
         # The schema will have level-dependent format strings
         self.schema = schemas.get(schema, schemas["default"])
 
@@ -117,9 +117,20 @@ class FancyFormatter(logging.Formatter):
         record_dict["msg"] = pretty
 
         # Shortcut characters for adding extra color
-        if record_dict["msg"].startswith("%"):
-            record_dict["msg"] = self.color_text(record_dict["msg"][1:], "purple")
-        message = formats[style].format(**record_dict)
+        if record_dict["msg"].startswith("#!"):
+            record_dict["msg"] = (
+                self.color_text(record_dict["msg"][2:], "purple") + "\n"
+            )
+            message = formats[style].format(**record_dict)
+        elif record_dict["msg"].startswith("#^"):
+            record_dict["msg"] = record_dict["msg"][2:]
+            message = formats[style].format(**record_dict)
+        elif record_dict["msg"].startswith("#$"):
+            record_dict["msg"] = self.color_text(record_dict["msg"][2:], "green") + "\n"
+            message = formats["msg"].format(**record_dict)
+        else:
+            record_dict["msg"] += "\n"
+            message = formats[style].format(**record_dict)
         return message
 
 
@@ -130,9 +141,10 @@ def fancy_logger(name, fmt=None, level=None):
     name_logger = logging.getLogger(name)
     name_logger.setLevel(level)
     name_logger.propagate = False
-    # Make sure not to have more than one stdout handler
+    # Make sure not to re-add the handlers if the same name is used
     if not name_logger.handlers:
         handler = logging.StreamHandler(sys.stdout)
+        handler.terminator = ""
         handler.setFormatter(FancyFormatter(fmt=fmt))
         name_logger.addHandler(handler)
     return name_logger
