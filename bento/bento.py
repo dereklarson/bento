@@ -180,10 +180,12 @@ class Bento:
         # This context contains the info fed into the Jinja template
         # The main job of the Bento class is to boil down the supplied description
         # into this context.
+        self.theme_spec = style.BentoStyle(
+            theme=self.desc.get("theme"), theme_dict=self.desc.get("theme_dict")
+        ).spec
         self.context = {
             "name": self.desc["name"],
-            "theme": self.desc["theme"],
-            "theme_dict": self.desc.get("theme_dict", {}),
+            "theme_spec": self.theme_spec,
             "appbar": self.desc.get("appbar", {}),
             "data": self.desc["data"],
             "pages": {},
@@ -292,13 +294,13 @@ class Bento:
         jenv = Environment(loader=PackageLoader("bento"), **env_args)
         pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
 
-        classes = style.BentoStyle(theme=self.context["theme"])
+        classes = style.BentoStyle(theme_dict=self.theme_spec)
 
         # Write baseline css containing some static, general settings
         template = jenv.get_template(self.baseline_template)
         out_file = self.baseline_template.replace(".j2", "")
         with open(f"{folder}/{out_file}", "w") as fh:
-            str_output = template.render(classes.theme)
+            str_output = template.render(classes.spec)
             fh.write(str_output)
 
         logging.info(f"Wrote {folder}/{out_file}")
@@ -306,7 +308,7 @@ class Bento:
         # This CSS ensures all components adhere to the theme appearance
         template = jenv.get_template(self.theme_template)
         with open(f"{folder}/{filename}", "w") as fh:
-            str_output = template.render(classes.theme)
+            str_output = template.render(classes.spec)
             fh.write(str_output)
 
         logging.info(f"Wrote {folder}/{filename}")

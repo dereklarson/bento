@@ -1,3 +1,19 @@
+/* ---- Buttons ---- */
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+	padding: 0 30px;
+	color: {{color__on_primary}};
+	background-color: transparent;
+	border-color: {{color__on_primary}};
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 4px;
+}
+
+
 /* ---- DatePicker ---- */
 .bento-theme [class*="Calendar"]:not([class*="blocked"]),
 .bento-theme [class*="DayPicker"],
@@ -19,7 +35,9 @@
 	/* note there seems to be some stylesheets that try to override this */
 	background-color: {{color__surface}} !important;
 	background-clip: padding-box;
-	border: {{color__border}};
+	border-color: {{color__on_surface}};
+	border-width: 1px;
+	border-style: solid;
 }
 
 /* Selected values should be bolder */
