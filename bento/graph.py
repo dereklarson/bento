@@ -23,12 +23,14 @@ class Graph:
         y_label=None,
         x_scale="linear",
         y_scale="linear",
+        color=None,
         opacity=0.7,
         mode="lines+markers",
         line_width=3,
         marker_size=10,
         marker_line_width=0.5,
         marker_line_color="black",
+        keys=None,
         filters=[],
         transforms=[],
         **kwargs,
@@ -42,6 +44,8 @@ class Graph:
         elif isinstance(y_column, list):
             y_columns = y_column
             y_label = y_label or y_column[0]
+
+        key_columns = keys or ["date"]
 
         graph_call = getattr(go, variant.title())
 
@@ -59,7 +63,7 @@ class Graph:
             fig.add_trace(graph_call(**settings))
 
         elif variant in ("scatter", "bar", "histogram"):
-            traces = butil.prepare_traces(idf, filters)
+            traces = butil.prepare_traces(idf, filters, key_columns)
             traces = butil.trace_analytics(traces, transforms)
             for trace_df in traces:
                 y_idx = 1
@@ -94,6 +98,13 @@ class Graph:
 
                     settings = data_settings.get(variant, default_settings)
                     settings.update(style_settings.get(variant, {}))
+
+                    # TODO An early way to introduce using marker color that needs work
+                    if color:
+                        settings["marker_color"] = (
+                            trace_df[color].astype("category").cat.codes
+                        )
+                        settings["text"] = trace_df[color]
 
                     fig.add_trace(graph_call(**settings))
                     y_idx += 1

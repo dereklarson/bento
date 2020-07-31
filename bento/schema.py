@@ -35,7 +35,11 @@ descriptor_schema = {
     "theme_dict": {"type": "dict"},
     "appbar": {
         "type": "dict",
-        "schema": {"title": {"type": "string"}, "subtitle": {"type": "string"}},
+        "schema": {
+            "title": {"type": "string"},
+            "subtitle": {"type": "string"},
+            "image": {"type": "string"},
+        },
     },
     "data": {"type": "dict"},
     "pages": {
