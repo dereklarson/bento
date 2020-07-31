@@ -101,7 +101,7 @@ def rank(idf, key, column, count=10, **kwargs):
 # NOTE Used for preparing the traces for graphs
 # TODO Should combine this with filter_df/
 # @logutil.loginfo(level='debug')
-def prepare_traces(idf, filters):
+def prepare_traces(idf, filters, key_columns):
     # NOTE Brought over from figure callback, default multi-column approach
     # TODO Figure out how to determine default columns from df
     # column = self.data.get("keys", self.data["columns"][0])[0]
@@ -151,7 +151,7 @@ def prepare_traces(idf, filters):
 
     new_traces = []
     for df in traces:
-        new = df.groupby(["date"]).sum().reset_index()
+        new = df.groupby(key_columns).sum().reset_index()
         new.name = df.name
         new_traces.append(new)
     traces = new_traces

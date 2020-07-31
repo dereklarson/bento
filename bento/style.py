@@ -90,6 +90,7 @@ class BentoStyle:
             "display": "flex",
             "flexDirection": "row",
             "justifyContent": "space-between",
+            "background-size": "100%",
         }
 
         # Most components besdies the App Bar are contained in the page

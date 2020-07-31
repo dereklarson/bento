@@ -60,7 +60,7 @@ main_children = [
         {% endfor %}
           ], style=classes.link_set),
       {% endif %}
-      ], style=classes.appbar),
+      ], style={**classes.appbar, "backgroundImage": "url('assets/{{appbar.image}}')"}),
   html.Div(id="page", style=classes.page),
   ]
 app.layout = html.Div(children=main_children, id="main", style=classes.main)
