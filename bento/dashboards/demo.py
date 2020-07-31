@@ -178,7 +178,7 @@ data_page = {
 
 
 descriptor = {
-    "name": "demo",
+    "name": "demonstration",
     "theme": "dark",
     "appbar": {"title": "Bento Demo", "subtitle": "A gallery of Dash recreations"},
     "data": {
@@ -197,9 +197,23 @@ descriptor = {
 }
 
 
+def serve():
+    """Both writes and serves the demo dashboard 
+    It is used in the "bento-dash" console script supplied by setup.py
+    """
+    print("Running simple Bento demonstration...")
+    import sys
+    from bento import bento
+
+    bento.Bento(descriptor).write()
+    sys.path.append(".")
+
+    from bento_app import app  # noqa
+
+    app.run_server(host="0.0.0.0", port=8050, debug=False)
+
+
 if __name__ == "__main__":
     from bento import bento
 
-    app_def = bento.Bento(descriptor)
-    app_def.write_css()
-    app_def.write("bento_app.py")
+    bento.Bento(descriptor).write()

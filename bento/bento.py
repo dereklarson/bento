@@ -11,22 +11,19 @@ from bento import banks, grid, schema, style
 
 from bento.common import logger, logutil, dictutil, codeutil  # noqa
 
-# from bento.common.structure import ENV
-
 logging = logger.fancy_logger(__name__, fmt="simple")
 
 
 class Bento:
     def __init__(self, descriptor, init_only=False):
-        # TODO Use theme template with self.init_theme()
-        # self.template = "dash_grid_theme.py"
+        """Converts the supplied descriptor into a jinja2 template context"""
         self.template = "bento_v1.py.j2"
         self.baseline_template = "baseline.css.j2"
         self.theme_template = "theme.css.j2"
 
         # Catches any problems with the input descriptor up front
         if not self.is_valid(descriptor):
-            logging.warning("Returning")
+            logging.warning("Exiting Bento intialization after failed validation")
             return
 
         # Stores a normalized version of the descriptor, ensuring uniformity
@@ -39,9 +36,6 @@ class Bento:
         # Generates the initial context object
         self.init_structure()
 
-        # TODO Currently disabled, until we can figure out how to get it to work well
-        # self.init_theme()
-
         if init_only:
             return
 
@@ -51,7 +45,7 @@ class Bento:
             self.create_page(pageid, page)
             # Specifies and attaches connectors to callbacks
             self.connect_page(page)
-            logging.info(f"#$ connected")
+            logging.info(f"#$+ connected")
 
     # @logutil.loginfo(level='debug')
     def is_valid(self, descriptor):
@@ -60,10 +54,11 @@ class Bento:
         validator = cerberus.Validator(schema.descriptor_schema)
         self.valid = validator.validate(descriptor)
         if not self.valid:
-            logging.warning("#!\nFailed due to the following errors:")
+            logging.info("#$- failed")
+            logging.warning("Descriptor validaiton failed due to the following errors:")
             logging.warning(validator.errors)
         else:
-            logging.info("#$ passed")
+            logging.info("#$+ passed")
 
         return self.valid
 
@@ -134,7 +129,7 @@ class Bento:
                 bank["args"]["gid"] = {"pageid": pagename, "bankid": bankname}
                 new_banks[self.bankid(pagename, bankname)] = bank
             page["banks"] = new_banks
-        logging.info("#$ done")
+        logging.info("#$+ done")
         return desc
 
     def process_data(self, descriptor):
@@ -149,7 +144,7 @@ class Bento:
                 continue
             data[dataid] = getattr(data_module, entry["call"])(**entry["args"])
             data[dataid]["columns"] = list(data[dataid]["types"].keys())
-            logging.info("#$ done")
+            logging.info("#$+ done")
         return data
 
     def init_structure(self):
@@ -198,31 +193,7 @@ class Bento:
             "connectors": connectors,
             "callbacks": callbacks,
         }
-        logging.info("#$ done")
-
-    def init_theme(self):
-        # TODO Currently disabled, until we can figure out how to get it to work well
-        # Uses the newer Dash dynamic callbacks
-        page_out = ["({'page': dd.ALL}, 'style')", "({'page': dd.ALL}, 'className')"]
-        self.context["connectors"]["theme"] = {
-            "inputs": [("location", "pathname")],
-            "outputs": [("main", "style"), ("appbar", "style")] + page_out,
-        }
-
-        callback_code = """
-            # Presumes only a simple url is passed in, probably enough for a template
-            page_id = args[0].replace("/", "") if args[0] else "default"
-            themes = {'mars': 'light', 'stock': 'dark flat sparse'}
-            _classes = BentoStyle(theme=themes.get(page_id, ""))
-            output = [_classes.main, _classes.appbar]
-            # output.extend([_classes.grid, _classes.theme["class_name"]])
-            return output
-            """
-
-        self.context["callbacks"]["theme"] = {
-            "name": "update_theme",
-            "code": codeutil.format_code(callback_code),
-        }
+        logging.info("#$+ done")
 
     def create_page(self, pageid, page):
         # Prepares the definitions of the bank containers

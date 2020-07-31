@@ -39,16 +39,9 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Topic :: Scientific/Engineering :: Visualization",
     ],
-    packages=[
-        "bento",
-        "bento.common",
-        "bento.common.scrub",
-        "bento.dashboards",
-        "bento.sample_data",
-        "bento.templates",
-    ],
+    packages=["bento", "bento.common", "bento.dashboards", "bento.sample_data"],
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requires("install"),
-    entry_points={"console_scripts": ["bento-test-gen=bento.test_gen:main"]},
+    entry_points={"console_scripts": ["bento-demo=bento.dashboards.demo:serve"]},
 )
