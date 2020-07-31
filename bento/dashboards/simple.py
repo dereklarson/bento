@@ -18,6 +18,4 @@ descriptor = {
 if __name__ == "__main__":
     from bento import bento
 
-    app_def = bento.Bento(descriptor)
-    app_def.write_css()
-    app_def.write("simple_bento_app.py")
+    bento.Bento(descriptor).write()

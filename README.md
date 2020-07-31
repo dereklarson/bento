@@ -22,14 +22,9 @@ Bento is available on PyPI, and the latest version can be installed with:
 
 `pip3 install bento-dash`
 
-To make sure everything is working, try building the demo app:
+To make sure everything is working, try running the demo app:
 
-`python3 -m bento.dashboards.demo`
-
-If there are no warnings, you should see `bento_app.py` and `assets/`.
-You can now run:
-
-`python3 bento_app.py`
+`bento-demo`
 
 And navigate in your browser to `localhost:8050`.
 

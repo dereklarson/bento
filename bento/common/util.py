@@ -1,16 +1,10 @@
-import hashlib
-import inspect
-import os
 import pathlib
-import pickle
 import pkgutil
 import re
 import subprocess
-import time
 import pandas as pd
 
 from bento.common import logger
-from bento.common.structure import PathConf
 
 logging = logger.fancy_logger(__name__)
 
@@ -61,13 +55,13 @@ def df_loader(filename, package="bento", parse_dates=["date"], location="."):
     for loc in location_list:
         try:
             df = pd.read_csv(f"{loc}/{filename}", **args)
-            logging.info(f"*** Loaded DF from {filename} with {len(df)} rows***")
             # TODO Figure out some log-based way to get this output cleanly
-            if logging.level <= 10:
-                print(df.head(3))
+            # logging.info(f"*** Loaded DF from {filename} with {len(df)} rows***")
+            # if logging.level <= 10:
+            #     print(df.head(3))
             return df
         except FileNotFoundError:
-            logging.debug(f"Couldn't find {filename} at {loc}")
+            logging.debug(f"Didn't find {filename} at {loc}")
 
     logging.warning(f"Unable to load {filename} from any of {location_list}")
 
@@ -108,6 +102,7 @@ def memoize(func):
     cache = func.cache = {}
 
     def run(*args, **kwargs):
+        # NOTE This does break if args contains non-hashable objects like lists
         key = args + tuple(sorted(kwargs.items()))
         if key in cache:
             return cache[key]
@@ -117,87 +112,3 @@ def memoize(func):
             return result
 
     return run
-
-
-def check_cache(fullhash, age_limit):
-    timestamp_limit = int(time.time()) - age_limit
-    for cache_file in PathConf.pycache.glob():
-        if fullhash in cache_file:
-            try:
-                stamp = re.search(r"_t(\d{10})_", cache_file).groups()[0]
-                if stamp < timestamp_limit:
-                    continue
-            except Exception:
-                pass
-            logging.info(f"  Loading from cache {os.path.basename(cache_file)}")
-            with open(cache_file, "rb") as fh:
-                data = pickle.load(fh)
-            return data
-
-
-# Decorator: adds local file cache, based on data and func hash
-def addcache(func):
-    age_limit = 600
-
-    def run(*args, **kwargs):
-        cache_name = "default"
-        cargs = list(args + tuple(kwargs.values()))
-        # TODO upgrade this simple check for filename
-        if cargs and type(cargs[0]) == str:
-            cache_name = cargs[0].replace("/", "_")
-        if cargs and ".csv" in cargs[0]:
-            data_path = cargs[0]
-            cache_name = data_path.split("/")[-1]
-            logging.info(f"  Checking cache for {cache_name}...")
-            # Our hash string is 4 chars each of the hashed function and hashed file
-            fullhash = hash_func(func)[:4] + hash_file(data_path)[:4]
-            data = check_cache(fullhash, age_limit)
-            if data is not None:
-                return data
-
-        elif cargs and hasattr(cargs[0], "columns"):
-            df = cargs[0]
-            # TODO log the name of df?
-            cache_name = "df"
-            size = f"{len(df)} x {len(df.columns)}"
-            cols = df.columns if len(df.columns) < 5 else ""
-            logging.info(f"  Checking cache on {size} dataframe {cols}...")
-            # Our hash string is 4 chars each of the hashed function and hashed object
-            fullhash = hash_func(func)[:4] + hash_obj(df)[:4]
-            data = check_cache(fullhash, age_limit)
-            if data is not None:
-                return data
-
-        result = func(*args, **kwargs)
-        ts = int(time.time())
-        logging.info(f"  ...writing cache on {cache_name}")
-        filename = f"{cache_name}_{fullhash}_{ts}.pkl"
-        PathConf.pycache.dump(result, filename)
-        return result
-
-    return run
-
-
-def _hash(string):
-    h = hashlib.sha256()
-    h.update(string)
-    return h.hexdigest()
-
-
-def hash_obj(obj):
-    return _hash(pickle.dumps(obj))
-
-
-@memoize
-def hash_func(func):
-    return _hash(inspect.getsource(func).encode())
-
-
-def hash_file(filename):
-    h = hashlib.sha256()
-    b = bytearray(128 * 1024)
-    mv = memoryview(b)
-    with open(filename, "rb", buffering=0) as f:
-        for n in iter(lambda: f.readinto(mv), 0):
-            h.update(mv[:n])
-    return h.hexdigest()

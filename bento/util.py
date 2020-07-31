@@ -181,10 +181,12 @@ def trace_analytics(traces, transforms):
     return traces
 
 
-def aggregate(idf, y_column=None, filters=None, logic="sum", **kwargs):
+def aggregate(idf, y_column=None, filters=None, logic="sum", keys=None, **kwargs):
     filters = filters or {}
     filters.update(kwargs.get("fixed_filters", {}))
-    traces = prepare_traces(idf, filters)
+    # TODO Plenty of work to do cleaning up the data processing utilities like this
+    keys = keys or ["date"]
+    traces = prepare_traces(idf, filters, keys)
     agg_df = pd.concat(traces)
     if not y_column:
         return len(agg_df), ""

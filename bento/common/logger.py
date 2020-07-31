@@ -118,21 +118,27 @@ class FancyFormatter(logging.Formatter):
         record_dict["level_str"] = self.level_fmt(record.levelname)
         record_dict["msg"] = pretty
 
-        # Shortcut characters for adding extra color
+        # --- Logging macros for doing some special operations ---
+        # Uses purple to draw extra attention to the text of the line
         if record_dict["msg"].startswith("#!"):
             record_dict["msg"] = (
                 self.color_text(record_dict["msg"][2:], "purple") + "\n"
             )
-            message = formats[style].format(**record_dict)
+        # Doesn't add a newline, allowing line continuation
         elif record_dict["msg"].startswith("#^"):
             record_dict["msg"] = record_dict["msg"][2:]
-            message = formats[style].format(**record_dict)
-        elif record_dict["msg"].startswith("#$"):
-            record_dict["msg"] = self.color_text(record_dict["msg"][2:], "green") + "\n"
-            message = formats["msg"].format(**record_dict)
+        # Next two Continue previous line by using a logformat with message text only
+        # First with green, indicating a desirable result
+        elif record_dict["msg"].startswith("#$+"):
+            record_dict["msg"] = self.color_text(record_dict["msg"][3:], "green") + "\n"
+            style = "msg"
+        # Seconde with red, indicating a problem
+        elif record_dict["msg"].startswith("#$-"):
+            record_dict["msg"] = self.color_text(record_dict["msg"][3:], "red") + "\n"
+            style = "msg"
         else:
             record_dict["msg"] += "\n"
-            message = formats[style].format(**record_dict)
+        message = formats[style].format(**record_dict)
         return message
 
 
