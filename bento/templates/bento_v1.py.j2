@@ -46,15 +46,13 @@ main_children = [
     [
       html.Div([
         html.H1("{{appbar.title}}", id='title', style=classes.h1),
-      {% if appbar.subtitle %}
         html.H5("{{appbar.subtitle}}", id='subtitle', style=classes.h3),
-      {% endif %}
       ], style=classes.titles),
       {% if pages|length > 1 %}
         html.Div([
         {% for uid in pages %}
           dcc.Link(
-              html.Button("{{uid}}", style=classes.button),
+              html.Button(butil.titlize("{{uid}}"), style=classes.button),
               href="/{{uid}}",
               style=classes.link),
         {% endfor %}
@@ -99,11 +97,11 @@ app.layout = html.Div(children=main_children, id="main", style=classes.main)
     html.Div([
       {% for bank in page.sidebar %}
       html.Details([
-        html.Summary("{{bank.title}}"),
+        html.Summary("{{bank.title}}", style=classes.summary),
         *{{bank.bankid}},
-        ], open=True),
+        ], open={{bank.open|default(True)}}),
       {% endfor %}
-      ], style={"gridColumn": "1 / 3", **classes.paper}),
+      ], style={"gridColumn": "1 / 4", **classes.paper}),
     {% endif %}
     {% for bank in page.banks %}
     html.Div({{bank.bankid}}, style={

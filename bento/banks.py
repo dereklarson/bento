@@ -44,21 +44,20 @@ class BentoBanks:
 
     # @logutil.loginfo(level='debug')
     def axis_controls(
-        self, gid, dataid, use=("x", "y"), scale=True, vertical=False, **kwargs
+        self, gid, dataid, use, multi=None, scale=False, vertical=False, **kwargs,
     ):
         blocks = []
-        option_args = dictutil.extract(r"^options$|^default$", kwargs)
         for axis_idx, axis in enumerate(use):
             # Define the dropdown to select a column to display on the axis
             label = f"{axis}-Axis Data".title()
             id_dict = {"name": f"{axis}_column", **gid}
             cargs = {"Dropdown.clearable": False, **kwargs}
 
-            # NOTE Toggle these lines for early multi-axis support
-            # if axis != "x":
-            #     cargs["Dropdown.multi"] = True
+            if multi and axis in multi:
+                cargs["Dropdown.multi"] = True
 
             default_idx = min(axis_idx, len(self.data[dataid]["columns"]) - 1)
+            option_args = dictutil.extract_path(f"{axis}.", kwargs)
             options = {
                 "options": self.data[dataid]["columns"],
                 "default": self.data[dataid]["columns"][default_idx],
@@ -114,14 +113,35 @@ class BentoBanks:
 
     # TODO In Progress
     def analytics_set(
-        self, gid, dataid, normalize=True, calculus=True, vertical=False, **kwargs
+        self,
+        gid,
+        dataid,
+        window=True,
+        normalize=True,
+        calculus=True,
+        vertical=False,
+        **kwargs,
     ):
         blocks = []
+        if window:
+            id_dict = {"name": "window_transform", **gid}
+            label = "Averaging Window"
+            # TODO Insert calculation of length of time between datapoints
+            windows = [(1, "Day"), (7, "Week"), (30, "Month"), (365, "Year")]
+            options = {
+                "options": [{"value": item[0], "label": item[1]} for item in windows],
+                "value": 1,
+            }
+            kwargs = {"Dropdown.clearable": False}
+            cid, window = bc.dropdown(id_dict, options, label, **kwargs)
+            self.outputs[cid] = "value"
+            blocks.append([[window]])
+
         if normalize:
             id_dict = {"name": f"norm_transform", **gid}
             label = f"Normalize by:".title()
             options = {
-                "options": ["None", "Max", "Other Series"],
+                "options": ["None", "Max"],
                 "default": "None",
             }
             drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
@@ -130,26 +150,16 @@ class BentoBanks:
 
         if calculus:
             id_dict = {"name": f"calc_transform", **gid}
-            label = f"Calculus (differential, cumulative):".title()
+            label = f"Sums and Rates".title()
             options = {
-                "options": ["Acceleration", "Diff", "None", "Cumulative"],
+                "options": ["Acceleration", "Rate", "None", "Cumulative"],
                 "default": "None",
             }
             drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **kwargs)
             self.outputs[drop_id] = "value"
             blocks.append([[dropdown]])
 
-            # default = (
-            #     "date" if "date" in df.columns else self.data[dataid]["columns"][0]
-            # )
-            # column = default
-            # id_dict = {"name": f"{column}_datestart", **gid}
-            # series = np.sort(df[column].unique().astype(int))
-            # slider_id, slider = bc.slider(id_dict, series, label)
-            # self.outputs[slider_id] = "value"
-            # blocks.append([[slider]])
-
-        block_size = {"ideal": [2, 3], "min": [1, 2]}
+        block_size = {"ideal": [2, 2], "min": [1, 2]}
         return self._align(blocks, vertical, block_size)
 
     def date_slider(
@@ -248,12 +258,13 @@ class BentoBanks:
         block_size = {"ideal": [2, 1.5], "min": [1, 1]}
         return self._align(blocks, vertical, block_size)
 
-    def ranking(self, gid, dataid, **kwargs):
+    def ranking(self, gid, dataid, nformat="d", **kwargs):
         id_dict = {"name": f"ranking", **gid}
         label = f"Top items"
         kwargs = {"Div.style": {"textAlign": "left"}, **kwargs}
         div_id, div = bc.div(id_dict, label=label, **kwargs)
 
+        # TODO Weigh in on whether using "geo" is the best 'key' (9L down) default
         callback_name = f"{gid['pageid']}_{gid['bankid']}__update_ranking"
         callback_code = f"""
             idf = data["{dataid}"]["df"]
@@ -269,7 +280,7 @@ class BentoBanks:
             inputs.update({kwargs})
 
             for item in butil.rank(fdf, **inputs):
-                text = f"{{item[1]}}     {{item[0]}}"
+                text = f"{{item[1]:{nformat}}}     {{item[0]}}"
                 children.extend([html.Span(text), html.Hr()])
             return children
             """
@@ -290,9 +301,11 @@ class BentoBanks:
         for col in columns:
             id_dict = {"name": f"{col}_filter", **gid}
             label = f"Select {col}".title()
+            option_args = dictutil.extract_path(f"{col}.", kwargs)
             options = {
                 "options": list(self.data[dataid]["df"][col].unique()),
                 "default": [],
+                **option_args,
             }
             cargs = {"Dropdown.multi": True, **kwargs}
             drop_id, dropdown = bc.dropdown(id_dict, options, label=label, **cargs)
@@ -351,23 +364,6 @@ class BentoBanks:
         block_size = {"ideal": [2, 4], "min": [1, 2]}
         return self._align(blocks, vertical, block_size)
 
-    def window_controls(self, gid, dataid, vertical=False, **kwargs):
-        blocks = []
-        id_dict = {"name": "window_transform", **gid}
-        label = "Averaging Window"
-        windows = [(1, "Day"), (7, "Week"), (30, "Month"), (365, "Year")]
-        options = {
-            "options": [{"value": item[0], "label": item[1]} for item in windows],
-            "value": 1,
-        }
-        kwargs = {"Dropdown.clearable": False}
-        cid, window = bc.dropdown(id_dict, options, label, **kwargs)
-        self.outputs[cid] = "value"
-        blocks.append([[window]])
-
-        block_size = {"ideal": [2, 2], "min": [1, 1]}
-        return self._align(blocks, vertical, block_size)
-
     def style_controls(self, gid, dataid, variants=(), vertical=False, **kwargs):
         blocks = []
 
@@ -414,7 +410,7 @@ class BentoBanks:
         # Two sliders for the size of the markers and line width
         sizes = pd.Series([5, 20])
         id_dict = {"name": "marker_size", **gid}
-        cid, marker_size = bc.slider(id_dict, sizes, "Marker Size", **kwargs)
+        cid, marker_size = bc.slider(id_dict, sizes, "Marker Size", value=10, **kwargs)
         self.outputs[cid] = "value"
         sizes = pd.Series([1, 10])
         id_dict = {"name": "line_width", **gid}

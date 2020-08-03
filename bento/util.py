@@ -42,7 +42,7 @@ def prepare_transforms(inputs, dep_var="y"):
         if "window" in key:
             transforms.append((dep_column, ["rolling", "mean"], [(value,), ()]))
         elif "calc" in key:
-            if value == "Diff":
+            if value == "Rate":
                 transforms.append((dep_column, ["diff"], [()]))
             elif value == "Acceleration":
                 transforms.append((dep_column, ["diff", "diff"], [(), ()]))
@@ -188,8 +188,12 @@ def aggregate(idf, y_column=None, filters=None, logic="sum", keys=None, **kwargs
     keys = keys or ["date"]
     traces = prepare_traces(idf, filters, keys)
     agg_df = pd.concat(traces)
+
+    # NOTE Pay attention to this block for multi-axis support
     if not y_column:
         return len(agg_df), ""
+    elif isinstance(y_column, list):
+        y_column = y_column[0]
     quantity = getattr(agg_df[y_column], logic)()
     return get_unit(quantity)
 

@@ -26,7 +26,7 @@ def process_inputs(input_dictionary):
     return {_cid2c(key): val for key, val in input_dictionary.items()}
 
 
-def extract(regex, input_dictionary, unique=False, pop=True):
+def extract(regex, input_dictionary, pop=True):
     """Splits off a subset dictionary with keys matching the provided 'path' prefix"""
     method = "pop" if pop else "get"
     match_keys = [key for key in input_dictionary if re.search(regex, key)]

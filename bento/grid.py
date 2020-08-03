@@ -9,8 +9,8 @@ logging = logger.fancy_logger(__name__, level=10)
 def apply_grid(page):
     gridsize = {"width": 12, "height": 8, "rowstart": 1}
     if page.get("sidebar"):
-        gridsize["width"] = 10
-        gridsize["rowstart"] = 3
+        gridsize["width"] = 9
+        gridsize["rowstart"] = 4
     layout = page.get("layout")
     arr, bout = arrange(page["banks"], layout, gridsize)
     return {

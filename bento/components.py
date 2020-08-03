@@ -46,6 +46,7 @@ def radio(id_dict, options, label=None, **kwargs):
     return _create("RadioItems", id_dict, args, label=label, **kwargs)
 
 
+# @logutil.loginfo(level="debug")
 def dropdown(id_dict, options, label=None, **kwargs):
     args = {**butil.gen_options(options)}
     return _create("Dropdown", id_dict, args, label=label, **kwargs)

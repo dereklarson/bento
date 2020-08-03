@@ -25,6 +25,7 @@ page_schema = {
     "connections": {"type": "dict"},
     "dataid": {"type": "string"},
     "layout": {"type": "list"},
+    "sidebar": {"type": "list"},
     "title": {"type": "string"},
     "subtitle": {"type": "string"},
 }
