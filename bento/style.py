@@ -129,7 +129,7 @@ class BentoStyle:
             #     "r": 40 + 4 * self.spec["pad_unit"],
             # },
             # "transition": {"duration": 500},
-            "font": {"color": self.spec["color__on_surface_secondary"]},
+            "font": {"color": self.spec["color__on_surface"]},
             "yaxis": {"gridcolor": self.spec["color__primary"]},
             "xaxis": {"gridcolor": self.spec["color__primary"]},
             "autosize": True,
@@ -145,6 +145,8 @@ class BentoStyle:
         }
 
         self.trace = {}
+
+        self.summary = {"backgroundColor": self.spec["color__primary"]}
 
         # Smaller scale objects: Paper > Bar > Block
         self.paper = {

@@ -115,10 +115,15 @@ class Bento:
             # Scan the sidebar for undefined banks and rekey
             new_sidebar = []
             for bankname in page.get("sidebar", []):
+                is_open = True
+                if bankname.startswith("_"):
+                    is_open = False
+                    bankname = bankname.replace("_", "")
                 if bankname not in page["banks"]:
                     continue
                 new_item = {"bankid": self.bankid(pagename, bankname)}
                 new_item["title"] = butil.titlize(bankname)
+                new_item["open"] = is_open
                 new_sidebar.append(new_item)
             page["sidebar"] = new_sidebar
 
@@ -136,15 +141,15 @@ class Bento:
         logging.info("Loading the dataframes specified:")
         data = {}
         for dataid, entry in descriptor["data"].items():
-            logging.info(f"#^  {dataid}...")
+            logging.info(f"  {dataid}:")
             try:
                 data_module = importlib.import_module(entry["module"])
             except ImportError:
-                logging.warning(f"\nFailed to load {entry['module']}")
+                logging.warning(f"Failed to load {entry['module']}")
                 continue
             data[dataid] = getattr(data_module, entry["call"])(**entry["args"])
             data[dataid]["columns"] = list(data[dataid]["types"].keys())
-            logging.info("#$+ done")
+            logging.info(f"    Loaded Dataframe of shape {data[dataid]['df'].shape}")
         return data
 
     def init_structure(self):
