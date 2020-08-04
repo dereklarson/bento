@@ -1,9 +1,12 @@
-from bento import bento, demo_descriptor
+from bento import bento
+from bento.dashboards import demo
 
 
 minimal = {
-    "data": {"covid": {"module": "bento.examples.covid"}},
-    "pages": {"123": {"dataid": "covid", "banks": {"axis": {"type": "axis_controls"}}}},
+    "data": {"covid": {"module": "bento.sample_dataset.covid"}},
+    "pages": {
+        "first": {"dataid": "covid", "banks": {"style": {"type": "style_controls"}}}
+    },
 }
 
 fail_descriptors = [
@@ -12,7 +15,7 @@ fail_descriptors = [
     {"pages": {"good_page": {"banks": {"_bad_bankname": {}}}}},
 ]
 
-pass_descriptors = [minimal, demo_descriptor.descriptor]
+pass_descriptors = [minimal, demo.descriptor]
 
 
 def test_fail_validation():

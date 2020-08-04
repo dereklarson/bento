@@ -3,7 +3,7 @@ mars_page = {
     "subtitle": "Demonstrating graph options and style",
     "dataid": "mars",
     "banks": {
-        "selector": {"type": "axis_controls", "args": {"use": "xy"}},
+        "selector": {"type": "axis_controls", "args": {"use": "xy", "scale": True}},
         "filters": {"type": "filter_set", "args": {}},
         "agg": {
             "type": "indicators",
@@ -38,18 +38,25 @@ stock_page = {
     "subtitle": "Demonstrating analytical features",
     "dataid": "stock",
     "banks": {
-        "selector": {"type": "axis_controls", "args": {"use": "y", "default": "open"},},
-        "filters": {"type": "filter_set", "args": {"vertical": True}},
-        "window": {"type": "window_controls"},
+        "selector": {
+            "type": "axis_controls",
+            "args": {"use": "y", "y.default": "open", "scale": True},
+        },
+        "filters": {
+            "type": "filter_set",
+            "width": 4,
+            "args": {"vertical": True, "columns": ["symbol"]},
+        },
+        "analytics": {"type": "analytics_set"},
         "traces": {
             "type": "graph",
             "args": {"x_column": "date", "x_scale": "date", "mode": "lines"},
         },
     },
-    "layout": [["selector", "filters", "window"], ["traces"]],
+    "layout": [["selector", "filters", "analytics"], ["traces"]],
     "connections": {
         "selector": {"traces"},
-        "window": {"traces"},
+        "analytics": {"traces"},
         "filters": {"traces"},
     },
 }
@@ -94,11 +101,7 @@ covid_page = {
 oilngas_page = {
     "dataid": "oil",
     "banks": {
-        "selector": {
-            "width": 3,
-            "type": "axis_controls",
-            "args": {"use": "xy", "scale": False},
-        },
+        "selector": {"width": 3, "type": "axis_controls", "args": {"use": "xy"},},
         "daterange": {"width": 4, "type": "date_slider", "args": {"variant": "range"},},
         "filters": {
             "type": "filter_set",
@@ -137,34 +140,6 @@ oilngas_page = {
     },
 }
 
-svm_page = {
-    "dataid": "mars",
-    "banks": {
-        "selector": {"type": "axis_controls", "args": {"use": "xy", "vertical": True},},
-        "data_settings": {
-            "type": "option_set",
-            "args": {
-                "components": [
-                    {
-                        "name": "n_samples",
-                        "options": [100, 200, 300, 400, 500],
-                        "label": "Sample Size:",
-                    },
-                    {
-                        "name": "noise",
-                        "options": [0, 0.2, 0.4, 0.6, 0.8, 1.0],
-                        "label": "Noise Level:",
-                    },
-                ]
-            },
-        },
-        "heatmap": {"type": "graph"},
-    },
-    "layout": [["heatmap"]],
-    "sidebar": ["selector", "data_settings"],
-    "connections": {"data_settings": {"heatmap"}, "selector": {"heatmap"},},
-}
-
 data_page = {
     "banks": {
         "mars_table": {"type": "data_table", "args": {"dataid": "mars"}},
@@ -198,7 +173,7 @@ descriptor = {
 
 
 def serve():
-    """Both writes and serves the demo dashboard 
+    """Both writes and serves the demo dashboard
     It is used in the "bento-dash" console script supplied by setup.py
     """
     print("Running simple Bento demonstration...")

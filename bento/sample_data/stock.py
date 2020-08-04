@@ -7,10 +7,8 @@ def load():
     filename = "sample_stock_data.csv"
     data = {
         "df": util.df_loader(filename, parse_dates=False),
-        "keys": ["symbol"],
+        "keys": ["date", "symbol"],
         "types": {
-            "date": "date",
-            "symbol": str,
             "open": float,
             "low": float,
             "high": float,

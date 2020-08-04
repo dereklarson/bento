@@ -11,6 +11,9 @@ from bento import util as butil
 
 logging = logger.fancy_logger(__name__)
 
+# TODO Find a place for constants like this
+MAX_OPTIONS = 100
+
 
 def _create(component_class, id_dict, args, lib="dcc", suffix="", label=None, **kwargs):
     """Helps wrap Dash components so they can be easily written out via Jinja2"""
@@ -49,6 +52,17 @@ def radio(id_dict, options, label=None, **kwargs):
 # @logutil.loginfo(level="debug")
 def dropdown(id_dict, options, label=None, **kwargs):
     args = {**butil.gen_options(options)}
+    if len(args["options"]) > MAX_OPTIONS:
+        if "overflow" in options:
+            logging.warning(f"Replacing {id_dict} option list with 'generator'")
+            args.pop("options")
+            args.pop("value")
+            args["overflow"] = f"butil.gen_options({options['overflow']})"
+        else:
+            logging.warning(
+                f"{id_dict} has many options {len(args['options'])} and"
+                "might cause performance issues"
+            )
     return _create("Dropdown", id_dict, args, label=label, **kwargs)
 
 

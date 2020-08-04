@@ -72,10 +72,15 @@ app.layout = html.Div(children=main_children, id="main", style=classes.main)
     {% for component in bar %}
     html.Div([
       {% if component.label %}
-      html.Label("{{component.label}}", style=classes.label),
+        html.Label("{{component.label}}", style=classes.label),
       {% endif %}
       dcc.Loading(
-          {{component.lib}}.{{component.component}}(**{{component.args}}),
+          {{component.lib}}.{{component.component}}(
+          {% set options = component.args.pop("overflow", None) %}
+          {% if options %} 
+            **{{options}},
+          {% endif %}
+	    **{{component.args}}),
           type="default",
           ),
     ], 
