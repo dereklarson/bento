@@ -188,14 +188,15 @@ if __name__ == "__main__":
     )
 
     try:
-        from dataclasses import dataclass, field
         from typing import List, Dict
 
-        @dataclass
+        @dataclasses.dataclass
         class Build:
             command: str
-            orders: List[str] = field(default_factory=list)
-            request: Dict = field(default_factory=lambda: {"url": "gen_build"})
+            orders: List[str] = dataclasses.field(default_factory=list)
+            request: Dict = dataclasses.field(
+                default_factory=lambda: {"url": "gen_build"}
+            )
 
         orders = [
             "Dataclass prettyprint",

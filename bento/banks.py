@@ -258,11 +258,14 @@ class BentoBanks:
         block_size = {"ideal": [2, 1.5], "min": [1, 1]}
         return self._align(blocks, vertical, block_size)
 
-    def ranking(self, gid, dataid, nformat="d", **kwargs):
+    def ranking(self, gid, dataid, nformat=None, **kwargs):
         id_dict = {"name": f"ranking", **gid}
         label = f"Top items"
         kwargs = {"Div.style": {"textAlign": "left"}, **kwargs}
         div_id, div = bc.div(id_dict, label=label, **kwargs)
+
+        # TODO Universal formatting is a pain, but see what we can do to improve this
+        nformat = ".7g"
 
         # TODO Weigh in on whether using "geo" is the best 'key' (9L down) default
         callback_name = f"{gid['pageid']}_{gid['bankid']}__update_ranking"
@@ -305,6 +308,7 @@ class BentoBanks:
             options = {
                 "options": list(self.data[dataid]["df"][col].unique()),
                 "default": [],
+                "overflow": f"""list(data["{dataid}"]["df"]["{col}"].unique())""",
                 **option_args,
             }
             cargs = {"Dropdown.multi": True, **kwargs}
