@@ -54,10 +54,9 @@ def dropdown(id_dict, options, label=None, **kwargs):
     args = {**butil.gen_options(options)}
     if len(args["options"]) > MAX_OPTIONS:
         if "overflow" in options:
-            logging.warning(f"Replacing {id_dict} option list with 'generator'")
             args.pop("options")
             args.pop("value")
-            args["overflow"] = f"butil.gen_options({options['overflow']})"
+            args["overflow"] = f"butil.gen_options({options['overflow']}, [])"
         else:
             logging.warning(
                 f"{id_dict} has many options {len(args['options'])} and"

@@ -10,6 +10,7 @@ gray[800] = "#343a40"
 gray[900] = "#212529"
 
 blue = "#133C93"
+blue = "#329dfa"
 indigo = "#6610f2"
 purple = "#6f42c1"
 pink = "#e83e8c"
@@ -28,6 +29,7 @@ bento = {
     "color__secondary": purple,
     "color__on_primary": gray[200],
     "color__on_surface": gray[800],
+    "color__on_surface_dark": gray[200],
     "color__on_surface_secondary": gray[700],
     "color__background": gray[100],
     "color__info": cyan,

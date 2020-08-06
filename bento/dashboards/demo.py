@@ -61,43 +61,6 @@ stock_page = {
     },
 }
 
-covid_page = {
-    "title": "COVID-19",
-    "subtitle": "Tracking case load",
-    "dataid": "covid",
-    "banks": {
-        "agg": {
-            "type": "indicators",
-            "width": 2,
-            "args": {"components": [{"args": {"y_column": "cases"}}]},
-        },
-        "date": {"type": "date_picker"},
-        "top10": {"type": "ranking", "args": {"key": "state", "column": "cases"}},
-        "mapsettings": {
-            "type": "option_set",
-            "args": {
-                "components": [
-                    {
-                        "name": "geo",
-                        "label": "Select geography",
-                        "options": ["us_states", "us_counties"],
-                    },
-                ]
-            },
-        },
-        "countymap": {
-            "type": "graph",
-            "width": 7,
-            "args": {"category": "map", "variant": "choropleth", "z_column": "cases",},
-        },
-    },
-    "layout": [["agg", "date", "mapsettings"], ["top10", "countymap"], ["trend"],],
-    "connections": {
-        "mapsettings": {"countymap", "trend"},
-        "date": {"countymap", "top10", "agg"},
-    },
-}
-
 oilngas_page = {
     "dataid": "oil",
     "banks": {
@@ -144,10 +107,9 @@ data_page = {
     "banks": {
         "mars_table": {"type": "data_table", "args": {"dataid": "mars"}},
         "oil_table": {"type": "data_table", "width": 6, "args": {"dataid": "oil"}},
-        "stock_table": {"type": "data_table", "args": {"dataid": "stock"}},
-        "covid_table": {"type": "data_table", "width": 6, "args": {"dataid": "covid"}},
+        "stock_table": {"type": "data_table", "width": 12, "args": {"dataid": "stock"}},
     },
-    "layout": [["mars_table", "oil_table"], ["stock_table", "covid_table"]],
+    "layout": [["mars_table", "oil_table"], ["stock_table"]],
     "connections": {},
 }
 
@@ -157,13 +119,11 @@ descriptor = {
     "theme": "dark",
     "appbar": {"title": "Bento Demo", "subtitle": "A gallery of Dash recreations"},
     "data": {
-        "covid": {"module": "bento.sample_data.covid"},
         "mars": {"module": "bento.sample_data.mars"},
         "oil": {"module": "bento.sample_data.oil"},
         "stock": {"module": "bento.sample_data.stock"},
     },
     "pages": {
-        "covid": covid_page,
         "oilngas": oilngas_page,
         "mars": mars_page,
         "stock": stock_page,
