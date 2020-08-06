@@ -4,7 +4,7 @@ import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, MATCH
 import plotly.graph_objects as go
 
 from bento.style import BentoStyle
@@ -38,15 +38,19 @@ data = {
 # Supported themes: light, dark, ...
 classes = BentoStyle(theme_dict={{theme_spec}})
 
+# The dictionary of help text, which gets overlaid onto banks when help is turned on
+help_reference = {}
+
 # --- Layout ---
 # Top-level: A main div containing two children: appbar and page content
 main_children = [
   dcc.Location(id="location", refresh=False),
+  html.Link(rel="stylesheet", href="https://fonts.googleapis.com/icon?family=Material+Icons"),
   html.Div(
     [
       html.Div([
         html.H1("{{appbar.title}}", id='title', style=classes.h1),
-        html.H5("{{appbar.subtitle}}", id='subtitle', style=classes.h3),
+        html.H5("{{appbar.subtitle}}", id='subtitle', style=classes.h5),
       ], style=classes.titles),
       {% if pages|length > 1 %}
         html.Div([
@@ -56,8 +60,12 @@ main_children = [
               href="/{{uid}}",
               style=classes.link),
         {% endfor %}
+        {% if show_help %}
+          html.I("help_outline", id="helpbtn", className="material-icons", style=classes.icon),
+        {% endif %}
           ], style=classes.link_set),
       {% endif %}
+      html.Div("APPBAR", id={'type': 'help', 'idx': 'appbar'}, style=classes.bento_help),
       ], style={**classes.appbar, "backgroundImage": "url('assets/{{appbar.image}}')"}),
   html.Div(id="page", style=classes.page),
   ]
@@ -76,6 +84,10 @@ app.layout = html.Div(children=main_children, id="main", style=classes.main)
       {% endif %}
       dcc.Loading(
           {{component.lib}}.{{component.component}}(
+          {% set class = component.args.pop("class", None) %}
+          {% if class %} 
+            style=classes.{{class}},
+          {% endif %}
           {% set options = component.args.pop("overflow", None) %}
           {% if options %} 
             **{{options}},
@@ -109,8 +121,11 @@ app.layout = html.Div(children=main_children, id="main", style=classes.main)
       ], style={"gridColumn": "1 / 4", **classes.paper}),
     {% endif %}
     {% for bank in page.banks %}
-    html.Div({{bank.bankid}}, style={
-             "gridColumn": "{{bank.column}} / span {{bank.width}}", **classes.paper}),
+    html.Div({{bank.bankid}} + [
+      html.Div(help_reference.get("{{bank.bankid}}", "{{bank.bankid}}"),
+	  id={'type': 'help', 'idx': "{{bank.bankid}}"}, style=classes.bento_help)
+      ],
+      style={"gridColumn": "{{bank.column}} / span {{bank.width}}", **classes.paper}),
     {% endfor%}
 ],
   style=classes.grid)
@@ -143,6 +158,19 @@ def update_title(*args):
     title = page_context.get(page_id, {}).get("title") or "{{appbar.title}}"
     subtitle = page_context.get(page_id, {}).get("subtitle") or "{{appbar.subtitle}}"
     return title, subtitle
+
+@app.callback(
+        Output({'type': 'help', 'idx': MATCH}, "style"),
+        [Input("helpbtn", "n_clicks")],
+        [State({'type': 'help', 'idx': MATCH}, "style")]
+)
+def update_help_overlay(n_clicks, style):
+    # Presumes only a simple url is passed in, probably enough for a template
+    if n_clicks and n_clicks % 2:
+	style['display'] = 'block'
+    else:
+	style['display'] = 'None'
+    return style
 
 {% for uid, conn in connectors.items() %}
 @app.callback(

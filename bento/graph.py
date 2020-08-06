@@ -191,8 +191,8 @@ class Graph:
             # Leading two digits of fips are state code
             if "state" in geo:
                 geo = "us_states"
-                pdf.loc[:, "fips"] = pdf["fips"].astype(str).str.slice(0, 2)
-                pdf = pdf.groupby(["fips", "state"]).sum().reset_index()
+                # pdf.loc[:, "fips"] = pdf["fips"].astype(str).str.slice(0, 2)
+                # pdf = pdf.groupby(["fips", "state"]).sum().reset_index()
                 loc_column = "fips"
                 text = pdf["state"]
             elif "count" in geo:

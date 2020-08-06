@@ -90,7 +90,7 @@ class BentoStyle:
             "display": "flex",
             "flexDirection": "row",
             "justifyContent": "space-between",
-            "background-size": "100%",
+            "background-size": "100%",  # Makes any supplied image stretch to fit
         }
 
         # Most components besdies the App Bar are contained in the page
@@ -102,11 +102,41 @@ class BentoStyle:
             "alignSelf": "flex-start",
             "alignItems": "flex-end",
         }
+        # Used for page title
         self.h1 = {"margin": 0}
-        self.h3 = {"margin": 0, "paddingLeft": 24, "fontStyle": "italic"}
+
+        # Used for indicator numerical values
+        self.h3 = {
+            "color": self.spec["color__primary"],
+        }
+
+        # Used for ranking bank title
+        self.h4 = {
+            "textAlign": "center",
+            "color": self.spec["color__primary"],
+            "fontWeight": 500,
+        }
+
+        # Used for page subtitle
+        self.h5 = {"margin": 0, "paddingLeft": 24, "fontStyle": "italic"}
+
+        # Numerical items in a ranking bank
+        self.rank_value = {
+            "color": self.spec["color__primary"],
+            "fontWeight": 500,
+            "fontSize": "2rem",
+        }
+
         self.link_set = {"display": "flex", "flexDirection": "row"}
         self.link = {"display": "flex"}
         self.button = {"align-self": "center"}
+        self.icon = {
+            "align-self": "center",
+            "color": self.spec["color__on_primary"],
+            "font-size": "30px",
+            "padding-right": "12px",
+            "padding-left": "12px",
+        }
 
         self.grid = {
             "display": "grid",
@@ -178,3 +208,16 @@ class BentoStyle:
         self.dcc = {}
         # NOTE This fixes x-scrolling for data_table
         self.dash_table = {"overflowX": "hidden"}
+
+        # To provide an in-app reference experience, the following style
+        # is used for providing helpful text overlays
+        self.bento_help = {
+            "position": "absolute",
+            "display": "None",
+            "backgroundColor": self.spec["color__info"],
+            "border-radius": "25px",
+            "color": "white",
+            "padding": 2 * self.spec["pad_unit"],
+            "opacity": 0.8,
+            "z-index": 10,
+        }

@@ -22,6 +22,12 @@ input[type="button"] {
 	background-color: {{color__surface}};
 }
 
+.bento-theme .SingleDatePickerInput__withBorder {
+	border-color: {{color__on_surface}};
+	border-width: 1px;
+	border-style: solid;
+}
+
 .bento-theme [class*="blocked"] {
 	color: {{color__on_surface_dark}} !important; /* Darker as it can't be used */
 	background-color: {{color__surface}} !important;
@@ -40,9 +46,11 @@ input[type="button"] {
 	border-style: solid;
 }
 
+
 /* Selected values should be bolder */
 .bento-theme .Select.has-value.Select--single > .Select-control,
 .bento-theme .Select-value,
+.bento-theme .Select-input>input,
 .bento-theme .Select-value-label {
 	/* note there seems to be some stylesheets that try to override this */
 	color: {{color__on_surface}} !important;

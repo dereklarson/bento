@@ -43,6 +43,7 @@ descriptor_schema = {
         },
     },
     "data": {"type": "dict"},
+    "show_help": {"type": "boolean"},
     "pages": {
         "type": "dict",
         "allow_unknown": True,

@@ -92,10 +92,14 @@ def filter_df(idf, filters):
     return odf
 
 
-def rank(idf, key, column, count=10, **kwargs):
-    fdf = idf.groupby([key]).sum().reset_index()
+# @logutil.loginfo(level="debug")
+# TODO Figure out a way around this hack, which manually filters out None strings as
+# a substitute for properly dealing with bipartite dataframes
+def rank(idf, key, text_key, column, count=10, **kwargs):
+    fdf = idf.groupby(key).sum().reset_index()
+    fdf = fdf[fdf[text_key] != "None"]
     fdf = fdf.nlargest(count, column)
-    return zip(fdf[key], fdf[column])
+    return zip(fdf[text_key], fdf[column])
 
 
 # NOTE Used for preparing the traces for graphs
@@ -219,18 +223,22 @@ def gen_marks(series, variant="auto"):
     return marks
 
 
-def gen_options(option_input):
+def gen_options(option_input, default=None):
     # In this case, we're given just the set of options only, assuming first is default
     if isinstance(option_input, list):
         option_list = option_input
-        default = option_list[0]
+        default = default if default is not None else option_list[0]
     # The default may be specified in the dict version
     elif isinstance(option_input, dict):
         # TODO Make this more robust
         if "value" in option_input:
             return option_input
         option_list = option_input["options"]
-        default = option_input.get("default", option_list[0])
+        default = (
+            default
+            if default is not None
+            else option_input.get("default", option_list[0])
+        )
     # TODO Can we determine when we should run desnake on the entries?
     options = [{"label": desnake(item).title(), "value": item} for item in option_list]
     return {"options": options, "value": default}

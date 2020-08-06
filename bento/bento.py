@@ -192,6 +192,7 @@ class Bento:
             "name": self.desc["name"],
             "theme_spec": self.theme_spec,
             "appbar": self.desc.get("appbar", {}),
+            "show_help": self.desc.get("show_help", False),
             "data": self.desc["data"],
             "pages": {},
             "banks": {},

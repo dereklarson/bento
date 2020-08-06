@@ -234,7 +234,7 @@ class BentoBanks:
             name = ind_comp.get("name", ind_comp["args"]["y_column"])
             label = ind_comp.get("label", butil.titlize(name))
             id_dict = {"name": f"{name}_indicator", **gid}
-            kwargs = {"Indicator.style": {"border": "1px solid gray"}, **kwargs}
+            kwargs = {"H3.class": "h3", **kwargs}
             cid, comp = bc.indicator(id_dict, label=label, **kwargs)
 
             callback_name = f"{gid['pageid']}_{gid['bankid']}__update_{name}"
@@ -260,9 +260,8 @@ class BentoBanks:
 
     def ranking(self, gid, dataid, nformat=None, **kwargs):
         id_dict = {"name": f"ranking", **gid}
-        label = f"Top items"
         kwargs = {"Div.style": {"textAlign": "left"}, **kwargs}
-        div_id, div = bc.div(id_dict, label=label, **kwargs)
+        div_id, div = bc.div(id_dict, label=None, **kwargs)
 
         # TODO Universal formatting is a pain, but see what we can do to improve this
         nformat = ".7g"
@@ -275,16 +274,21 @@ class BentoBanks:
 
             filters = butil.prepare_filters(inputs)
             fdf = butil.filter_df(idf, filters=filters)
-            children = []
 
             column = dictutil.extract_unique("_column", inputs)
-            key = dictutil.extract_unique("geo", inputs)
-            inputs.update({{"key": key, "column": column}})
+            geo = dictutil.extract_unique("geo", inputs)
+            inputs.update({{"key": [geo, "fips"], "text_key": geo, "column": column}})
             inputs.update({kwargs})
 
+            children = [
+                html.H4(f"Top in {{inputs['column'].title()}}", style=classes.h4)
+                ]
             for item in butil.rank(fdf, **inputs):
-                text = f"{{item[1]:{nformat}}}     {{item[0]}}"
-                children.extend([html.Span(text), html.Hr()])
+                text = [
+                  html.Span(f"{{item[1]:{nformat}}}", style=classes.rank_value),
+                  html.Span(f"      {{item[0]}}")
+                  ]
+                children.extend([html.Hr(), html.Span(text)])
             return children
             """
 
