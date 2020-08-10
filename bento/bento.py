@@ -1,9 +1,12 @@
+"""The fundamental Bento class that ties all of Bento's functionality together."""
+
 import black
 import cerberus
 import copy
 import importlib
 import pathlib
 import re
+from typing import Dict, List
 from jinja2 import Environment, PackageLoader
 
 from bento import util as butil
@@ -15,11 +18,52 @@ logging = logger.fancy_logger(__name__, fmt="simple")
 
 
 class Bento:
-    def __init__(self, descriptor, init_only=False):
-        """Converts the supplied descriptor into a jinja2 template context"""
-        self.template = "bento_v1.py.j2"
+    """Acts as the gateway to all Bento functionality.
+
+    Initialization Parameters
+    -------------------------
+    descriptor : dict
+        The descriptor contains all of the user-supplied information defining the
+        desired dashboard. See the user guide for creating a descriptor.
+    init_only : bool
+        Supply True in order to halt the automatic processing of the descriptor. This
+        can be useful for debugging or modifying the standard app-creation process.
+
+    Attributes
+    ----------
+    desc : dict
+        This stores the normalized version of the input descriptor.
+    data : dict
+        Contains the data as a dictionary. TODO
+    valid : bool
+        Whether the descriptor meets the schema. If False, will block processing.
+    context : dict
+        Specifies the app for consumption by a Jinja template.
+
+
+    Examples
+    --------
+    Simple:
+        >>> bento = Bento(my_descriptor)
+        >>> bento.write()
+
+    Advanced:
+        >>> bento = Bento(my_descriptor, init_only=True)
+        >>> test_page = bento.desc["pages"]["test"]
+        >>> bento.create_page("test", test_page)
+        >>> bento.context["pages"]["test"] = alternate_grid_method(test_page)
+        >>> bento.connect_page(test_page)
+        >>> bento.write(app_output="modified_test_layout.py")
+
+    """
+
+    def __init__(self, descriptor: Dict, init_only: bool = False):
+        # TODO Allow easy overriding of templates
+        self.app_template = "bento_v1.py.j2"
         self.baseline_template = "baseline.css.j2"
         self.theme_template = "theme.css.j2"
+        # Whether the descriptor meets the schema. If False, will block processing
+        self.valid = False
 
         # Catches any problems with the input descriptor up front
         if not self.is_valid(descriptor):
@@ -48,8 +92,8 @@ class Bento:
             logging.info(f"#$+ connected")
 
     # @logutil.loginfo(level='debug')
-    def is_valid(self, descriptor):
-        """Ensures a proper naming scheme is followed by the IDs"""
+    def is_valid(self, descriptor: Dict) -> bool:
+        """Ensures the descriptor meets the Cerberus schema (see schema.py)"""
         logging.info("#^Testing validity of input descriptor...")
         validator = cerberus.Validator(schema.descriptor_schema)
         self.valid = validator.validate(descriptor)
@@ -66,8 +110,9 @@ class Bento:
         return f"{pagename}{delim}{bankname}"
 
     # @logutil.loginfo(level='debug')
-    def normalize(self, descriptor):
-        """Auto-trims and -fills the descriptor
+    def normalize(self, descriptor: Dict) -> Dict:
+        """Auto-trims and -fills the descriptor.
+
          - Removes any dangling bankids, assuming 'banks' keys as source of truth
          - Generates full bankid (pageid + bankname)
          - Handle most defaults here so they aren't scattered about
@@ -137,7 +182,7 @@ class Bento:
         logging.info("#$+ done")
         return desc
 
-    def process_data(self, descriptor):
+    def process_data(self, descriptor: Dict) -> Dict:
         logging.info("Loading the dataframes specified:")
         data = {}
         for dataid, entry in descriptor["data"].items():
@@ -157,7 +202,7 @@ class Bento:
         # Outputs are a collection of fields provided by banks that are available
         # to be connected to other banks if the connections are provided
         # e.g. outputs + connections => connectors
-        self.outputs = {}
+        self._outputs = {}
 
         # Connectors define how the banks/components share information
         # They specify many-to-many <component_id>.<attribute> mappings
@@ -185,12 +230,12 @@ class Bento:
         # This context contains the info fed into the Jinja template
         # The main job of the Bento class is to boil down the supplied description
         # into this context.
-        self.theme_spec = style.BentoStyle(
+        self._theme_spec = style.BentoStyle(
             theme=self.desc.get("theme"), theme_dict=self.desc.get("theme_dict")
         ).spec
         self.context = {
             "name": self.desc["name"],
-            "theme_spec": self.theme_spec,
+            "theme_spec": self._theme_spec,
             "appbar": self.desc.get("appbar", {}),
             "show_help": self.desc.get("show_help", False),
             "data": self.desc["data"],
@@ -201,19 +246,32 @@ class Bento:
         }
         logging.info("#$+ done")
 
-    def create_page(self, pageid, page):
+    def create_page(self, pageid: str, page: Dict):
+        """Generates and lays out all banks defined for a page and updates the context
+
+        A page is composed of a set of banks, arranged based on a supplied layout
+        object (an array of 2+ dim).
+        """
         # Prepares the definitions of the bank containers
         for bankid, bank in page["banks"].items():
             self.context["banks"][bankid] = self.build_bank(bank, page)
 
-        self.outputs.update(self.bb.outputs)
+        self._outputs.update(self.bb.outputs)
         self.context["callbacks"].update(self.bb.callbacks)
         self.context["connectors"].update(self.bb.connectors)
 
         # Defines the layout of the page
         self.context["pages"][pageid] = grid.apply_grid(page)
 
-    def connect_page(self, page):
+    def connect_page(self, page: Dict):
+        """Applies the requested connections for the page to the Jinja context
+
+        A page is a set of connected banks, and the connections are defined by
+        a supplied directed graph (dict of sets) of bank_ids. For example,
+        `{'axes': {'map', 'counter'}, 'colors': {'map'}}` tells us the axes bank
+        should feed both the map and counter banks, while our colors bank should
+        feed just the map.
+        """
         connections = page.get("connections", {})
         # Loop over all pairs of defined sources and sinks
         for source_bankid, sink_set in connections.items():
@@ -232,12 +290,12 @@ class Bento:
                     # Add any connected inputs
                     # TODO The bankid.replace needs to be improved
                     for cid, var in dictutil.extract(
-                        source_bankid.replace("__", "/"), self.outputs, pop=False
+                        source_bankid.replace("__", "/"), self._outputs, pop=False
                     ).items():
                         self.context["connectors"][sink_cid]["inputs"].add((cid, var))
 
     # @logutil.loginfo(level='debug')
-    def build_bank(self, bank, page):
+    def build_bank(self, bank: Dict, page: Dict) -> List:
         # TODO Think through defaults on data, or perhaps just require a dataid
         args = {"dataid": "default"}
         # Get any page-level arguments
@@ -251,15 +309,21 @@ class Bento:
         bank["sizing"] = sizing
         return item
 
-    def write(self, app_output="bento_app.py", css_folder="assets"):
+    def write(self, app_output: str = "bento_app.py", css_folder: str = "assets"):
+        """Creates all of the standard Bento output files.
+
+        This is a convenience wrapper that allows for one simple call to generate
+        all of the application code for the output Bento app, usually a set of Python
+        and CSS files.
+        """
         if not self.valid:
             logging.warning("Descriptor never validated")
             return
         logging.info("Writing Dash application files:")
-        self.write_template(self.context, self.template, app_output)
+        self.write_template(self.context, self.app_template, app_output)
 
         pathlib.Path(css_folder).mkdir(parents=True, exist_ok=True)
-        spec = style.BentoStyle(theme_dict=self.theme_spec).spec
+        spec = style.BentoStyle(theme_dict=self._theme_spec).spec
 
         out_file = self.baseline_template.replace(".j2", "")
         self.write_template(spec, self.baseline_template, f"{css_folder}/{out_file}")
