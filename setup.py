@@ -14,7 +14,7 @@ def version():
 
 
 def requires(req_mode):
-    with open("requires-{}.txt".format(req_mode)) as fh:
+    with open("requires_{}.txt".format(req_mode)) as fh:
         requires = [line.strip() for line in fh]
         return [req for req in requires if req and not req.startswith("#")]
 
@@ -43,5 +43,6 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requires("install"),
+    extras_require={"dev": requires("dev")},
     entry_points={"console_scripts": ["bento-demo=bento.dashboards.demo:serve"]},
 )
