@@ -1,4 +1,4 @@
 pytest
 pytest-cov
-sphinx
+sphinx>=3.2
 sphinx-rtd-theme
