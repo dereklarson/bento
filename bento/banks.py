@@ -258,6 +258,23 @@ class BentoBanks:
         block_size = {"ideal": [2, 1.5], "min": [1, 1]}
         return self._align(blocks, vertical, block_size)
 
+    def info(self, gid, dataid, vertical=False, text="<info>", **kwargs):
+        id_dict = {"name": f"text", **gid}
+        # TODO Find what good defaults are and allow overrides
+        kwargs = {
+            "Div.style": {
+                "textAlign": "left",
+                "lineHeight": 1.2,
+                "fontStyle": "italic",
+            },
+            **kwargs,
+        }
+        div_id, div = bc.div(id_dict, children=text, label=None, **kwargs)
+
+        blocks = [[[div]]]
+        block_size = {"ideal": [2, 4], "min": [1, 1]}
+        return self._align(blocks, vertical, block_size)
+
     def ranking(self, gid, dataid, nformat=None, **kwargs):
         id_dict = {"name": f"ranking", **gid}
         kwargs = {"Div.style": {"textAlign": "left"}, **kwargs}
