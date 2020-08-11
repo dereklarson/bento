@@ -1,16 +1,19 @@
 trends_page = {
     "dataid": "covid",
-    "banks": {"axis": {"type": "axis_controls"}, "trend": {"type": "graph"},},
+    "banks": {
+        "axis": {"type": "axis_controls", "args": {"use": "xy", "scale": True}},
+        "trend": {"type": "graph"},
+    },
     "layout": [["axis"], ["trend"]],
     "connections": {"axis": {"trend"}},
 }
 
 descriptor = {
     "appbar": {
-        "title": "Sample COVID data",
+        "title": "Sample US covid data",
         "subtitle": "A simple, example Bento dashboard",
     },
-    "data": {"covid": {"module": "bento.examples.covid"}},
+    "data": {"covid": {"module": "bento.sample_data.covid"}},
     "pages": {"trends": trends_page},
 }
 

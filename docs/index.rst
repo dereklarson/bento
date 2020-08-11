@@ -1,5 +1,5 @@
-Welcome to bento-dash's documentation!
-======================================
+bento-dash
+==========
 
 .. toctree::
    :caption: Package Documentation
