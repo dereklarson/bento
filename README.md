@@ -1,9 +1,14 @@
 # Bento
 
 [![GitHub](https://img.shields.io/github/license/dereklarson/bento?style=for-the-badge)](https://github.com/dereklarson/bento/blob/master/LICENSE)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/dereklarson/bento?style=for-the-badge)](https://github.com/dereklarson/bento/graphs/contributors)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/bento-dash?style=for-the-badge)](https://pypi.org/project/bento-dash/)
+[![PyPI](https://img.shields.io/pypi/v/bento-dash?style=for-the-badge)](https://pypi.org/project/bento-dash/)
+[![Docs](https://img.shields.io/readthedocs/bento-dash?style=for-the-badge)](https://bento-dash.readthedocs.io/en/latest/index.html)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge)](https://github.com/psf/black)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/dereklarson/bento.svg?style=for-the-badge)](https://lgtm.com/projects/g/dereklarson/bento/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/dereklarson/bento.svg?style=for-the-badge)](https://lgtm.com/projects/g/dereklarson/bento/alerts/)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/dereklarson/bento?style=for-the-badge)](https://github.com/dereklarson/bento/graphs/contributors)
+
 
 ### *Create Plotly Dash apps via templates*
 
