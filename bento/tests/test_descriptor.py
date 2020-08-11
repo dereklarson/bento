@@ -1,5 +1,5 @@
 from bento import bento
-from bento.dashboards import demo
+from bento.dashboards import demo, simple
 
 
 minimal = {
@@ -15,7 +15,7 @@ fail_descriptors = [
     {"pages": {"good_page": {"banks": {"_bad_bankname": {}}}}},
 ]
 
-pass_descriptors = [minimal, demo.descriptor]
+pass_descriptors = [minimal, simple.descriptor, demo.descriptor]
 
 
 def test_fail_validation():
