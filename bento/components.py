@@ -132,6 +132,6 @@ def indicator(id_dict, label=None, **kwargs):
     return _create("H3", id_dict, args, lib="html", label=label, **kwargs)
 
 
-def div(id_dict, label=None, **kwargs):
-    args = {"children": "<Div>"}
+def div(id_dict, children="<Div>", label=None, **kwargs):
+    args = {"children": children}
     return _create("Div", id_dict, args, lib="html", label=label, **kwargs)

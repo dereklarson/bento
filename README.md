@@ -11,8 +11,8 @@
 
 
 ### *Create Plotly Dash apps via templates*
-
-![Bento Example](bento_example.gif)
+| <img src="bento_example.gif" width=2000px> | *This GIF shows the ideal Bento experience, how you can add components to a dashboard in real time. Adding two extra controls, fixing up the layout, and finally applying a dark theme were all simple, drop-in changes.* |
+|-|:-|
 
 Bento is a templating engine built on [Plotly Dash](https://plotly.com/dash/). It lets you
 write a high-level description of your desired interactive dashboard and generates
