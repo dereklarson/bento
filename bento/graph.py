@@ -132,8 +132,9 @@ class Graph:
                 {
                     f"yaxis{y_idx+1}": {
                         "type": y_scale,
-                        "title": y_columns[y_idx],
+                        "title": butil.titlize(y_columns[y_idx]),
                         "overlaying": "y",
+                        "showgrid": False,
                         "side": "right",
                     }
                 }
