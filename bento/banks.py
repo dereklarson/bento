@@ -84,13 +84,14 @@ class BentoBanks:
             # TODO includes temporary multi-column support
             callback_name = f"{gid['pageid']}_{gid['bankid']}__update_{axis}_radio"
             callback_code = f"""
+                data = _global_data["{dataid}"]
                 inputs = dictutil.process_inputs(dash.callback_context.inputs)
                 column = dictutil.extract_unique("_column", inputs)
 
                 if isinstance(column, list):
                     column = column[0]
 
-                col_type = data["{dataid}"]['types'].get(column, 'all')
+                col_type = data['types'].get(column, 'all')
                 options = ["linear", "log", "date"]
                 if col_type in (float, int):
                     options = ['linear', 'log']
@@ -239,7 +240,8 @@ class BentoBanks:
 
             callback_name = f"{gid['pageid']}_{gid['bankid']}__update_{name}"
             callback_code = f"""
-                idf = data["{dataid}"]["df"]
+                data = _global_data["{dataid}"]
+                idf = data["df"]
                 inputs = dictutil.process_inputs(dash.callback_context.inputs)
                 filters = butil.prepare_filters(inputs)
                 sig, scale = butil.aggregate(idf, filters=filters, **{ind_comp['args']})
@@ -286,7 +288,8 @@ class BentoBanks:
         # TODO Weigh in on whether using "geo" is the best 'key' (9L down) default
         callback_name = f"{gid['pageid']}_{gid['bankid']}__update_ranking"
         callback_code = f"""
-            idf = data["{dataid}"]["df"]
+            data = _global_data["{dataid}"]
+            idf = data["df"]
             inputs = dictutil.process_inputs(dash.callback_context.inputs)
 
             filters = butil.prepare_filters(inputs)
@@ -329,7 +332,8 @@ class BentoBanks:
             options = {
                 "options": list(self.data[dataid]["df"][col].unique()),
                 "default": [],
-                "overflow": f"""list(data["{dataid}"]["df"]["{col}"].unique())""",
+                "overflow": f"""
+                    list(_global_data["{dataid}"]["df"]["{col}"].unique())""",
                 **option_args,
             }
             cargs = {"Dropdown.multi": True, **kwargs}
@@ -471,7 +475,8 @@ class BentoBanks:
 
         callback_name = f"{gid['pageid']}_{gid['bankid']}__update_table"
         callback_code = f"""
-            fdf = data["{dataid}"]["df"]
+            data = _global_data["{dataid}"]
+            fdf = data["df"]
             # Default inputs will be anything passed in 'args' of component
             inputs = {kwargs}
 
@@ -506,19 +511,24 @@ class BentoBanks:
         else:
             dep_var = "y"
 
+        # TODO Break out defaults into utility function
+        # TODO Should we make variant one of the standard args?
         callback_name = f"{gid['pageid']}_{gid['bankid']}__update_figure"
         callback_code = f"""
-            fdf = data["{dataid}"]["df"]
+            data = _global_data["{dataid}"]
+            fdf = data["df"]
             # NOTE Thinking this through
             # Default inputs will be anything passed in 'args' of component
-            # inputs = {kwargs}
-            inputs = {{}}
+            # raw_inputs = {kwargs}
+            raw_inputs = {{}}
 
             # Override the default inputs with anything from the callback
-            inputs.update(dictutil.process_inputs(dash.callback_context.inputs))
+            raw_inputs.update(dictutil.process_inputs(dash.callback_context.inputs))
 
             # NOTE At least in some cases we want a manual override
-            inputs.update({kwargs})
+            raw_inputs.update({kwargs})
+            component_type = f"graph.{category}.{kwargs.get('variant', 'scatter')}"
+            inputs = butil.apply_defaults(component_type, raw_inputs, data)
 
             filters = butil.prepare_filters(inputs)
             transforms = butil.prepare_transforms(inputs, dep_var="{dep_var}")

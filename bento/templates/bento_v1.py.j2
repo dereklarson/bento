@@ -29,7 +29,7 @@ app.config.suppress_callback_exceptions = True
 
 # This should contain any non-interactive data prep required
 logging.info("Loading the application data frames...")
-data = {
+_global_data = {
     {% for dataid, entry in data.items() %}
     "{{dataid}}": {{dataid}}_data.{{entry['call']}}(**{{entry['args']}}),
     {% endfor %}

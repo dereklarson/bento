@@ -31,7 +31,7 @@ class Graph:
         marker_line_width=0.5,
         marker_line_color="black",
         keys=None,
-        filters=[],
+        filters={},
         transforms=[],
         **kwargs,
     ):
@@ -166,7 +166,7 @@ class Graph:
         marker_opacity=0.8,
         marker_line_width=0,
         marker_line_color="black",
-        filters=[],
+        filters={},
         **kwargs,
     ):
         fig = go.Figure()

@@ -294,6 +294,18 @@ class Bento:
                     ).items():
                         self.context["connectors"][sink_cid]["inputs"].add((cid, var))
 
+        # Ensure each callback can trigger, even if nothing feeds it
+        for sink_cid, cb_def in self.context["callbacks"].items():
+            if sink_cid not in self.context["connectors"]:
+                # The callback defines what component properties it provides
+                sink_vals = cb_def.get("provides")
+                if not sink_vals:
+                    continue
+                self.context["connectors"][sink_cid] = {
+                    "outputs": [(sink_cid, val) for val in sink_vals],
+                    "inputs": {("location", "pathname")},
+                }
+
     # @logutil.loginfo(level='debug')
     def build_bank(self, bank: Dict, page: Dict) -> List:
         # TODO Think through defaults on data, or perhaps just require a dataid

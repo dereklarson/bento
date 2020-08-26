@@ -102,6 +102,33 @@ def rank(idf, key, text_key, column, count=10, **kwargs):
     return zip(fdf[text_key], fdf[column])
 
 
+def apply_defaults(component_type, raw_inputs, data):
+    inputs = {}
+    inputs.update(raw_inputs)
+
+    if not component_type.startswith("graph.normal"):
+        logging.debug("No defaults implemented for non-normal graph components")
+        return inputs
+
+    if "x_column" not in inputs:
+        possible = [col for col in data["df"].columns if "date" in col]
+        inputs["x_column"] = possible[0]
+        inputs["x_scale"] = "date"
+        logging.info(f"Graph x_column missing, setting to '{possible[0]}'")
+        logging.info(f"  ...also setting x_scale to 'date'")
+
+    if "y_column" not in inputs:
+        possible = [
+            key
+            for key, val in data["types"].items()
+            if "date" not in key and "date" != val
+        ]
+        inputs["y_column"] = possible[0]
+        logging.info(f"Graph y_column missing, setting to '{possible[0]}'")
+
+    return inputs
+
+
 # NOTE Used for preparing the traces for graphs
 # TODO Should combine this with filter_df/
 # @logutil.loginfo(level='debug')
