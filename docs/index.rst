@@ -8,4 +8,5 @@ bento-dash
    introduction
    quickstart
    concepts
+   tutorials
    api

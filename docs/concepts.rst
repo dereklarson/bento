@@ -9,7 +9,7 @@ Data
 ----
 Everything begins with data, and Bento doesn’t try to assist with the data processing.
 It is assumed you will supply your dashboard with prepared data in a pandas DataFrame.
-This helps decouple your visualization code from any data prepareation code.
+This helps decouple your visualization code from any data preparation code.
 However, Bento does inform the dashboard by what’s in the data. For example, dropdown menus
 for filters can be automatically populated by what is in the dataframe.
 

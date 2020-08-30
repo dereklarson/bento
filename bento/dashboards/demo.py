@@ -4,7 +4,7 @@ mars_page = {
     "dataid": "mars",
     "banks": {
         "selector": {"type": "axis_controls", "args": {"use": "xy", "scale": True}},
-        "filters": {"type": "filter_set", "args": {}},
+        "filters": {"type": "selector", "args": {}},
         "agg": {
             "type": "indicators",
             "width": 2,
@@ -43,7 +43,7 @@ stock_page = {
             "args": {"use": "y", "y.default": "open", "scale": True},
         },
         "filters": {
-            "type": "filter_set",
+            "type": "selector",
             "width": 4,
             "args": {"vertical": True, "columns": ["symbol"]},
         },
@@ -67,7 +67,7 @@ oilngas_page = {
         "selector": {"width": 3, "type": "axis_controls", "args": {"use": "xy"},},
         "daterange": {"width": 4, "type": "date_slider", "args": {"variant": "range"},},
         "filters": {
-            "type": "filter_set",
+            "type": "selector",
             "args": {"columns": ["type", "status"], "vertical": True},
             "width": 4,
         },

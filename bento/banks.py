@@ -322,7 +322,7 @@ class BentoBanks:
         block_size = {"ideal": [4, 2], "min": [1, 1]}
         return self._align(blocks, True, block_size)
 
-    def filter_set(self, gid, dataid, columns=(), vertical=False, **kwargs):
+    def selector(self, gid, dataid, columns=(), vertical=False, **kwargs):
         columns = columns or self.data[dataid]["keys"]
         blocks = []
         for col in columns:

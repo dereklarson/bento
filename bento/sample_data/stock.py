@@ -6,8 +6,8 @@ logging = logger.fancy_logger(__name__)
 def load():
     filename = "sample_stock_data.csv"
     data = {
-        "df": util.df_loader(filename, parse_dates=False),
-        "keys": ["date", "symbol"],
+        "df": util.df_loader(filename, parse_dates=["date"]),
+        "keys": ["symbol"],
         "types": {
             "open": float,
             "low": float,

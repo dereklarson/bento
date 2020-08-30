@@ -83,7 +83,14 @@ def filter_df(idf, filters):
             if "datetime" in str(type(values[0])):
                 values = [np.datetime64(item) for item in values]
             if logic == "between":
-                odf = odf[(odf[column] >= values[0]) & (odf[column] <= values[1])]
+                # TODO generalize filters to handle types
+                try:
+                    odf = odf[(odf[column] >= values[0]) & (odf[column] <= values[1])]
+                except TypeError:
+                    odf = odf[
+                        (odf[column].astype(int) >= values[0])
+                        & (odf[column].astype(int) <= values[1])
+                    ]
             elif logic == "or":
                 odf = odf[odf[column].isin(values)]
             elif logic == "and":
@@ -146,7 +153,14 @@ def prepare_traces(idf, filters, key_columns):
         if logic == "between":
             for column, values in columns.items():
                 for df in traces:
-                    new = df[(df[column] >= values[0]) & (df[column] <= values[1])]
+                    # TODO generalize filters to handle types
+                    try:
+                        new = df[(df[column] >= values[0]) & (df[column] <= values[1])]
+                    except TypeError:
+                        new = df[
+                            (df[column].astype(int) >= values[0])
+                            & (df[column].astype(int) <= values[1])
+                        ]
                     new.name = df.name
                     new_traces.append(new)
         elif logic == "or":
