@@ -1,0 +1,216 @@
+country,alpha3,region,subregion,population
+Afghanistan,AFG,Asia,Southern Asia,34656032.0
+Albania,ALB,Europe,Southern Europe,2876101.0
+Algeria,DZA,Africa,Northern Africa,40606052.0
+American Samoa,ASM,Oceania,Polynesia,55599.0
+Andorra,AND,Europe,Southern Europe,77281.0
+Angola,AGO,Africa,Sub-Saharan Africa,28813463.0
+Antigua and Barbuda,ATG,Americas,Latin America and the Caribbean,100963.0
+Argentina,ARG,Americas,Latin America and the Caribbean,43847430.0
+Armenia,ARM,Asia,Western Asia,2924816.0
+Aruba,ABW,Americas,Latin America and the Caribbean,104822.0
+Australia,AUS,Oceania,Australia and New Zealand,24127159.0
+Austria,AUT,Europe,Western Europe,8747358.0
+Azerbaijan,AZE,Asia,Western Asia,9762274.0
+Bahamas,BHS,Americas,Latin America and the Caribbean,391232.0
+Bahrain,BHR,Asia,Western Asia,1425171.0
+Bangladesh,BGD,Asia,Southern Asia,162951560.0
+Barbados,BRB,Americas,Latin America and the Caribbean,284996.0
+Belarus,BLR,Europe,Eastern Europe,9507120.0
+Belgium,BEL,Europe,Western Europe,11348159.0
+Belize,BLZ,Americas,Latin America and the Caribbean,366954.0
+Benin,BEN,Africa,Sub-Saharan Africa,10872298.0
+Bermuda,BMU,Americas,Northern America,65331.0
+Bhutan,BTN,Asia,Southern Asia,797765.0
+"Bolivia, Plurinational State of",BOL,Americas,Latin America and the Caribbean,10887882.0
+Bosnia and Herzegovina,BIH,Europe,Southern Europe,3516816.0
+Botswana,BWA,Africa,Sub-Saharan Africa,2250260.0
+Brazil,BRA,Americas,Latin America and the Caribbean,207652865.0
+Brunei Darussalam,BRN,Asia,South-eastern Asia,423196.0
+Bulgaria,BGR,Europe,Eastern Europe,7127822.0
+Burkina Faso,BFA,Africa,Sub-Saharan Africa,18646433.0
+Burundi,BDI,Africa,Sub-Saharan Africa,10524117.0
+Cabo Verde,CPV,Africa,Sub-Saharan Africa,539560.0
+Cambodia,KHM,Asia,South-eastern Asia,15762370.0
+Cameroon,CMR,Africa,Sub-Saharan Africa,23439189.0
+Canada,CAN,Americas,Northern America,36286425.0
+Cayman Islands,CYM,Americas,Latin America and the Caribbean,60765.0
+Central African Republic,CAF,Africa,Sub-Saharan Africa,4594621.0
+Chad,TCD,Africa,Sub-Saharan Africa,14452543.0
+Chile,CHL,Americas,Latin America and the Caribbean,17909754.0
+China,CHN,Asia,Eastern Asia,1378665000.0
+Colombia,COL,Americas,Latin America and the Caribbean,48653419.0
+Comoros,COM,Africa,Sub-Saharan Africa,795601.0
+Congo,COG,Africa,Sub-Saharan Africa,5125821.0
+"Congo, Democratic Republic of the",COD,Africa,Sub-Saharan Africa,78736153.0
+Costa Rica,CRI,Americas,Latin America and the Caribbean,4857274.0
+Côte d'Ivoire,CIV,Africa,Sub-Saharan Africa,23695919.0
+Croatia,HRV,Europe,Southern Europe,4170600.0
+Cuba,CUB,Americas,Latin America and the Caribbean,11475982.0
+Curaçao,CUW,Americas,Latin America and the Caribbean,159999.0
+Cyprus,CYP,Asia,Western Asia,1170125.0
+Czechia,CZE,Europe,Eastern Europe,10561633.0
+Denmark,DNK,Europe,Northern Europe,5731118.0
+Djibouti,DJI,Africa,Sub-Saharan Africa,942333.0
+Dominica,DMA,Americas,Latin America and the Caribbean,73543.0
+Dominican Republic,DOM,Americas,Latin America and the Caribbean,10648791.0
+Ecuador,ECU,Americas,Latin America and the Caribbean,16385068.0
+Egypt,EGY,Africa,Northern Africa,95688681.0
+El Salvador,SLV,Americas,Latin America and the Caribbean,6344722.0
+Equatorial Guinea,GNQ,Africa,Sub-Saharan Africa,1221490.0
+Estonia,EST,Europe,Northern Europe,1316481.0
+Eswatini,SWZ,Africa,Sub-Saharan Africa,1343098.0
+Ethiopia,ETH,Africa,Sub-Saharan Africa,102403196.0
+Faroe Islands,FRO,Europe,Northern Europe,49117.0
+Fiji,FJI,Oceania,Melanesia,898760.0
+Finland,FIN,Europe,Northern Europe,5495096.0
+France,FRA,Europe,Western Europe,66896109.0
+French Polynesia,PYF,Oceania,Polynesia,280208.0
+Gabon,GAB,Africa,Sub-Saharan Africa,1979786.0
+Gambia,GMB,Africa,Sub-Saharan Africa,2038501.0
+Georgia,GEO,Asia,Western Asia,3719300.0
+Germany,DEU,Europe,Western Europe,82667685.0
+Ghana,GHA,Africa,Sub-Saharan Africa,28206728.0
+Gibraltar,GIB,Europe,Southern Europe,34408.0
+Greece,GRC,Europe,Southern Europe,10746740.0
+Greenland,GRL,Americas,Northern America,56186.0
+Grenada,GRD,Americas,Latin America and the Caribbean,107317.0
+Guam,GUM,Oceania,Micronesia,162896.0
+Guatemala,GTM,Americas,Latin America and the Caribbean,16582469.0
+Guinea,GIN,Africa,Sub-Saharan Africa,12395924.0
+Guinea-Bissau,GNB,Africa,Sub-Saharan Africa,1815698.0
+Guyana,GUY,Americas,Latin America and the Caribbean,773303.0
+Haiti,HTI,Americas,Latin America and the Caribbean,10847334.0
+Honduras,HND,Americas,Latin America and the Caribbean,9112867.0
+Hong Kong,HKG,Asia,Eastern Asia,7346700.0
+Hungary,HUN,Europe,Eastern Europe,9817958.0
+Iceland,ISL,Europe,Northern Europe,334252.0
+India,IND,Asia,Southern Asia,1324171354.0
+Indonesia,IDN,Asia,South-eastern Asia,261115456.0
+"Iran, Islamic Republic of",IRN,Asia,Southern Asia,80277428.0
+Iraq,IRQ,Asia,Western Asia,37202572.0
+Ireland,IRL,Europe,Northern Europe,4773095.0
+Isle of Man,IMN,Europe,Northern Europe,83737.0
+Israel,ISR,Asia,Western Asia,8547100.0
+Italy,ITA,Europe,Southern Europe,60600590.0
+Jamaica,JAM,Americas,Latin America and the Caribbean,2881355.0
+Japan,JPN,Asia,Eastern Asia,126994511.0
+Jordan,JOR,Asia,Western Asia,9455802.0
+Kazakhstan,KAZ,Asia,Central Asia,17797032.0
+Kenya,KEN,Africa,Sub-Saharan Africa,48461567.0
+Kiribati,KIR,Oceania,Micronesia,114395.0
+"Korea, Democratic People's Republic of",PRK,Asia,Eastern Asia,25368620.0
+"Korea, Republic of",KOR,Asia,Eastern Asia,51245707.0
+Kuwait,KWT,Asia,Western Asia,4052584.0
+Kyrgyzstan,KGZ,Asia,Central Asia,6082700.0
+Laos,LAO,Asia,South-eastern Asia,6758353.0
+Latvia,LVA,Europe,Northern Europe,1960424.0
+Lebanon,LBN,Asia,Western Asia,6006668.0
+Lesotho,LSO,Africa,Sub-Saharan Africa,2203821.0
+Liberia,LBR,Africa,Sub-Saharan Africa,4613823.0
+Libya,LBY,Africa,Northern Africa,6293253.0
+Liechtenstein,LIE,Europe,Western Europe,37666.0
+Lithuania,LTU,Europe,Northern Europe,2872298.0
+Luxembourg,LUX,Europe,Western Europe,582972.0
+Macao,MAC,Asia,Eastern Asia,612167.0
+Madagascar,MDG,Africa,Sub-Saharan Africa,24894551.0
+Malawi,MWI,Africa,Sub-Saharan Africa,18091575.0
+Malaysia,MYS,Asia,South-eastern Asia,31187265.0
+Maldives,MDV,Asia,Southern Asia,417492.0
+Mali,MLI,Africa,Sub-Saharan Africa,17994837.0
+Malta,MLT,Europe,Southern Europe,436947.0
+Marshall Islands,MHL,Oceania,Micronesia,53066.0
+Mauritania,MRT,Africa,Sub-Saharan Africa,4301018.0
+Mauritius,MUS,Africa,Sub-Saharan Africa,1263473.0
+Mexico,MEX,Americas,Latin America and the Caribbean,127540423.0
+"Micronesia, Federated States of",FSM,Oceania,Micronesia,104937.0
+"Moldova, Republic of",MDA,Europe,Eastern Europe,3552000.0
+Monaco,MCO,Europe,Western Europe,38499.0
+Mongolia,MNG,Asia,Eastern Asia,3027398.0
+Montenegro,MNE,Europe,Southern Europe,622781.0
+Morocco,MAR,Africa,Northern Africa,35276786.0
+Mozambique,MOZ,Africa,Sub-Saharan Africa,28829476.0
+Myanmar,MMR,Asia,South-eastern Asia,52885223.0
+Namibia,NAM,Africa,Sub-Saharan Africa,2479713.0
+Nauru,NRU,Oceania,Micronesia,13049.0
+Nepal,NPL,Asia,Southern Asia,28982771.0
+Netherlands,NLD,Europe,Western Europe,17018408.0
+New Caledonia,NCL,Oceania,Melanesia,278000.0
+New Zealand,NZL,Oceania,Australia and New Zealand,4692700.0
+Nicaragua,NIC,Americas,Latin America and the Caribbean,6149928.0
+Niger,NER,Africa,Sub-Saharan Africa,20672987.0
+Nigeria,NGA,Africa,Sub-Saharan Africa,185989640.0
+North Macedonia,MKD,Europe,Southern Europe,2081206.0
+Northern Mariana Islands,MNP,Oceania,Micronesia,55023.0
+Norway,NOR,Europe,Northern Europe,5232929.0
+Oman,OMN,Asia,Western Asia,4424762.0
+Pakistan,PAK,Asia,Southern Asia,193203476.0
+Palau,PLW,Oceania,Micronesia,21503.0
+Palestine,PSE,Asia,Western Asia,4551566.0
+Panama,PAN,Americas,Latin America and the Caribbean,4034119.0
+Papua New Guinea,PNG,Oceania,Melanesia,8084991.0
+Paraguay,PRY,Americas,Latin America and the Caribbean,6725308.0
+Peru,PER,Americas,Latin America and the Caribbean,31773839.0
+Philippines,PHL,Asia,South-eastern Asia,103320222.0
+Poland,POL,Europe,Eastern Europe,37948016.0
+Portugal,PRT,Europe,Southern Europe,10324611.0
+Puerto Rico,PRI,Americas,Latin America and the Caribbean,3411307.0
+Qatar,QAT,Asia,Western Asia,2569804.0
+Romania,ROU,Europe,Eastern Europe,19705301.0
+Russian Federation,RUS,Europe,Eastern Europe,144342396.0
+Rwanda,RWA,Africa,Sub-Saharan Africa,11917508.0
+Saint Kitts and Nevis,KNA,Americas,Latin America and the Caribbean,54821.0
+Saint Lucia,LCA,Americas,Latin America and the Caribbean,178015.0
+Saint Martin (French part),MAF,Americas,Latin America and the Caribbean,31949.0
+Saint Vincent and the Grenadines,VCT,Americas,Latin America and the Caribbean,109643.0
+Samoa,WSM,Oceania,Polynesia,195125.0
+San Marino,SMR,Europe,Southern Europe,33203.0
+Sao Tome and Principe,STP,Africa,Sub-Saharan Africa,199910.0
+Saudi Arabia,SAU,Asia,Western Asia,32275687.0
+Senegal,SEN,Africa,Sub-Saharan Africa,15411614.0
+Serbia,SRB,Europe,Southern Europe,7057412.0
+Seychelles,SYC,Africa,Sub-Saharan Africa,94677.0
+Sierra Leone,SLE,Africa,Sub-Saharan Africa,7396190.0
+Singapore,SGP,Asia,South-eastern Asia,5607283.0
+Sint Maarten (Dutch part),SXM,Americas,Latin America and the Caribbean,40005.0
+Slovakia,SVK,Europe,Eastern Europe,5428704.0
+Slovenia,SVN,Europe,Southern Europe,2064845.0
+Solomon Islands,SLB,Oceania,Melanesia,599419.0
+Somalia,SOM,Africa,Sub-Saharan Africa,14317996.0
+South Africa,ZAF,Africa,Sub-Saharan Africa,55908865.0
+South Sudan,SSD,Africa,Sub-Saharan Africa,12230730.0
+Spain,ESP,Europe,Southern Europe,46443959.0
+Sri Lanka,LKA,Asia,Southern Asia,21203000.0
+Sudan,SDN,Africa,Northern Africa,39578828.0
+Suriname,SUR,Americas,Latin America and the Caribbean,558368.0
+Sweden,SWE,Europe,Northern Europe,9903122.0
+Switzerland,CHE,Europe,Western Europe,8372098.0
+Syrian Arab Republic,SYR,Asia,Western Asia,18430453.0
+Taiwan,TWN,Asia,Eastern Asia,23570000.0
+Tajikistan,TJK,Asia,Central Asia,8734951.0
+"Tanzania, United Republic of",TZA,Africa,Sub-Saharan Africa,55572201.0
+Thailand,THA,Asia,South-eastern Asia,68863514.0
+Timor-Leste,TLS,Asia,South-eastern Asia,1268671.0
+Togo,TGO,Africa,Sub-Saharan Africa,7606374.0
+Tonga,TON,Oceania,Polynesia,107122.0
+Trinidad and Tobago,TTO,Americas,Latin America and the Caribbean,1364962.0
+Tunisia,TUN,Africa,Northern Africa,11403248.0
+Turkey,TUR,Asia,Western Asia,79512426.0
+Turkmenistan,TKM,Asia,Central Asia,5662544.0
+Turks and Caicos Islands,TCA,Americas,Latin America and the Caribbean,34900.0
+Tuvalu,TUV,Oceania,Polynesia,11097.0
+Uganda,UGA,Africa,Sub-Saharan Africa,41487965.0
+Ukraine,UKR,Europe,Eastern Europe,45004645.0
+United Arab Emirates,ARE,Asia,Western Asia,9269612.0
+United Kingdom of Great Britain and Northern Ireland,GBR,Europe,Northern Europe,65637239.0
+United States of America,USA,Americas,Northern America,323127513.0
+Uruguay,URY,Americas,Latin America and the Caribbean,3444006.0
+Uzbekistan,UZB,Asia,Central Asia,31848200.0
+Vanuatu,VUT,Oceania,Melanesia,270402.0
+"Venezuela, Bolivarian Republic of",VEN,Americas,Latin America and the Caribbean,31568179.0
+Viet Nam,VNM,Asia,South-eastern Asia,92701100.0
+"Virgin Islands, British",VGB,Americas,Latin America and the Caribbean,30661.0
+"Virgin Islands, U.S.",VIR,Americas,Latin America and the Caribbean,102951.0
+Yemen,YEM,Asia,Western Asia,27584213.0
+Zambia,ZMB,Africa,Sub-Saharan Africa,16591390.0
+Zimbabwe,ZWE,Africa,Sub-Saharan Africa,16150362.0

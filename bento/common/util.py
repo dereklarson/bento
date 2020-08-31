@@ -1,8 +1,5 @@
-import pathlib
-import pkgutil
 import re
 import subprocess
-import pandas as pd
 
 from bento.common import logger
 
@@ -40,30 +37,6 @@ def nice_command(cmd):
         logging.info(f"Letting {cmd[0]} clean up...")
         proc.wait()
         logging.info("...Done")
-
-
-def df_loader(filename, package="bento", parse_dates=["date"], location="."):
-    args = {
-        "index_col": 0,
-        "parse_dates": parse_dates or [],
-        "infer_datetime_format": True,
-    }
-    # First try locally for an override file, then check assets
-    init_py_path = pkgutil.get_loader(package).path
-    package_path = pathlib.Path(init_py_path).parent
-    location_list = [location, "assets", f"{package_path}/assets"]
-    for loc in location_list:
-        try:
-            df = pd.read_csv(f"{loc}/{filename}", **args)
-            # TODO Figure out some log-based way to get this output cleanly
-            # logging.info(f"*** Loaded DF from {filename} with {len(df)} rows***")
-            # if logging.level <= 10:
-            #     print(df.head(3))
-            return df
-        except FileNotFoundError:
-            logging.debug(f"Didn't find {filename} at {loc}")
-
-    logging.warning(f"Unable to load {filename} from any of {location_list}")
 
 
 # Runs a supplied shell command, handling output

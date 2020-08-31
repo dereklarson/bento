@@ -3,7 +3,7 @@ from bento.dashboards import demo, simple
 
 
 minimal = {
-    "data": {"covid": {"module": "bento.sample_dataset.covid"}},
+    "data": {"covid": {"module": "bento.sample_data.covid"}},
     "pages": {
         "first": {"dataid": "covid", "banks": {"style": {"type": "style_controls"}}}
     },
