@@ -1,4 +1,4 @@
-from bento import bento
+from bento import Bento
 from bento.dashboards import demo, simple
 
 
@@ -20,11 +20,11 @@ pass_descriptors = [minimal, simple.descriptor, demo.descriptor]
 
 def test_fail_validation():
     for test_desc in fail_descriptors:
-        invalid_instance = bento.Bento(test_desc)
+        invalid_instance = Bento(test_desc)
         assert not invalid_instance.valid
 
 
 def test_pass_validation():
     for test_desc in pass_descriptors:
-        valid_instance = bento.Bento(test_desc)
+        valid_instance = Bento(test_desc)
         assert valid_instance.valid

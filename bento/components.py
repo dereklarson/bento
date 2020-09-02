@@ -15,7 +15,9 @@ logging = logger.fancy_logger(__name__)
 MAX_OPTIONS = 100
 
 
-def _create(component_class, id_dict, args, lib="dcc", suffix="", label=None, **kwargs):
+def _create(
+    component_class, id_dict, gargs, lib="dcc", suffix="", label=None, **kwargs
+):
     """Helps wrap Dash components so they can be easily written out via Jinja2"""
     bankid, name, pageid = dictutil.pluck(id_dict)
     cid = f"{pageid}/{bankid}|{name}{suffix}"
@@ -25,7 +27,7 @@ def _create(component_class, id_dict, args, lib="dcc", suffix="", label=None, **
         "label": label,
         "args": {
             "id": cid,
-            **args,
+            **gargs,
             # Allows users to supply arguments to Dash components via the descriptor
             **dictutil.extract_path(f"{component_class}.", kwargs),
         },
@@ -72,28 +74,32 @@ def slider(id_dict, series, label=None, marks=False, variant="auto", **kwargs):
         "min": series.min(),
         "max": series.max(),
     }
+    if marks:
+        args["marks"] = butil.gen_marks(series, variant)
+        args["step"] = None
     if variant == "date":
         args = {
             "value": kwargs.get("value") or int(series.min()),
             "min": int(series.min()),
             "max": int(series.max()),
         }
+    elif variant == "range":
+        spacing = math.ceil(len(series) / 10)
+        args.update(
+            {
+                "value": [series.min(), series.max()],
+                "marks": {
+                    int(item): {
+                        "label": str(item)[:4],
+                        "style": {"transform": "rotate(45deg)"},
+                    }
+                    for item in sorted(series)[::spacing]
+                },
+            }
+        )
+        return _create("RangeSlider", id_dict, args, label=label, **kwargs)
 
-    if marks:
-        args["marks"] = butil.gen_marks(series, variant)
-        args["step"] = None
     return _create("Slider", id_dict, args, label=label, **kwargs)
-
-
-def range_slider(id_dict, series, label=None, marks=None, **kwargs):
-    spacing = math.ceil(len(series) / 10)
-    args = {
-        "min": series.min(),
-        "max": series.max(),
-        "value": [series.min(), series.max()],
-        "marks": {str(item): str(item) for item in sorted(series)[::spacing]},
-    }
-    return _create("RangeSlider", id_dict, args, label=label, **kwargs)
 
 
 def date_picker(id_dict, series, label=None, variant="single", **kwargs):
@@ -101,9 +107,14 @@ def date_picker(id_dict, series, label=None, variant="single", **kwargs):
         "min_date_allowed": series.min(),
         "max_date_allowed": series.max(),
         "initial_visible_month": series.max(),
-        "date": series.max(),
     }
-    return _create("DatePickerSingle", id_dict, args, label=label, **kwargs)
+    if variant == "single":
+        args["date"] = series.max()
+        return _create("DatePickerSingle", id_dict, args, label=label, **kwargs)
+    elif variant == "range":
+        args["start_date"] = series.min()
+        args["end_date"] = series.max()
+        return _create("DatePickerRange", id_dict, args, label=label, **kwargs)
 
 
 def stepper(id_dict, **kwargs):

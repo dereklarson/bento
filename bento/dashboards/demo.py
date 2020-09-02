@@ -138,9 +138,9 @@ def serve():
     """
     print("Running simple Bento demonstration...")
     import sys
-    from bento import bento
+    from bento.bento import Bento
 
-    bento.Bento(descriptor).write()
+    Bento(descriptor).write()
     sys.path.append(".")
 
     from bento_app import app  # noqa
@@ -149,6 +149,6 @@ def serve():
 
 
 if __name__ == "__main__":
-    from bento import bento
+    from bento.bento import Bento
 
-    bento.Bento(descriptor).write()
+    Bento(descriptor).write()

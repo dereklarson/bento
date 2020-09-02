@@ -10,7 +10,7 @@ from typing import Dict, List
 from jinja2 import Environment, PackageLoader
 
 from bento import util as butil
-from bento import banks, grid, schema, style
+from bento import banks, banks_v1, grid, schema, style
 
 from bento.common import logger, logutil, dictutil, codeutil  # noqa
 
@@ -75,7 +75,7 @@ class Bento:
 
         # Loads the input data to inform components to the columns, types, etc
         self.data = self.process_data(self.desc)
-        self.bb = banks.BentoBanks(self.data)
+        self.bb = banks_v1.BentoBanks(self.data)
 
         # Generates the initial context object
         self.init_structure()
@@ -176,7 +176,9 @@ class Bento:
             new_banks = {}
             for bankname, bank in page["banks"].items():
                 bank["args"] = bank.get("args", {})
-                bank["args"]["gid"] = {"pageid": pagename, "bankid": bankname}
+                bank["args"]["uid"] = {"pageid": pagename, "bankid": bankname}
+                default_dataid = page.get("dataid", list(desc["data"].keys())[0])
+                bank["args"]["dataid"] = bank["args"].get("dataid", default_dataid)
                 new_banks[self.bankid(pagename, bankname)] = bank
             page["banks"] = new_banks
         logging.info("#$+ done")
@@ -254,7 +256,16 @@ class Bento:
         """
         # Prepares the definitions of the bank containers
         for bankid, bank in page["banks"].items():
-            self.context["banks"][bankid] = self.build_bank(bank, page)
+            # Use new Bank class first, fall back to old system
+            try:
+                bank = self.load_bank(bank)
+                self._outputs.update(bank.outputs)
+                self.context["banks"][bankid] = bank.layout
+                self.context["callbacks"].update(bank.callbacks)
+                self.context["connectors"].update(bank.connectors)
+            except Exception:
+                logging.debug(f"Failed new Bank load for {bankid}")
+                self.context["banks"][bankid] = self.build_bank(bank, page)
 
         self._outputs.update(self.bb.outputs)
         self.context["callbacks"].update(self.bb.callbacks)
@@ -262,6 +273,30 @@ class Bento:
 
         # Defines the layout of the page
         self.context["pages"][pageid] = grid.apply_grid(page)
+
+    # @logutil.loginfo(level='debug')
+    def load_bank(self, bank: Dict) -> List:
+        # TODO Eliminate 'args' and perhaps pop type from bank
+        bank_obj = banks._bank_map[bank["type"]](
+            g_data=self.data, **bank, **bank["args"]
+        )
+        # TODO Eliminate dependence on this
+        bank["sizing"] = bank_obj.sizing
+        return bank_obj
+
+    # @logutil.loginfo(level='debug')
+    def build_bank(self, bank: Dict, page: Dict) -> List:
+        args = {"dataid": ""}
+        # Get any page-level arguments
+        args.update(dictutil.extract("dataid", page, pop=False))
+        # Overwrite with specific args for bank
+        args.update(bank["args"])
+        item, sizing = getattr(self.bb, bank["type"])(**args)
+        if "width" in bank:
+            sizing["min"][1] = bank["width"]
+            sizing["ideal"][1] = bank["width"]
+        bank["sizing"] = sizing
+        return item
 
     def connect_page(self, page: Dict):
         """Applies the requested connections for the page to the Jinja context
@@ -305,21 +340,6 @@ class Bento:
                     "outputs": [(sink_cid, val) for val in sink_vals],
                     "inputs": {("location", "pathname")},
                 }
-
-    # @logutil.loginfo(level='debug')
-    def build_bank(self, bank: Dict, page: Dict) -> List:
-        # TODO Think through defaults on data, or perhaps just require a dataid
-        args = {"dataid": "default"}
-        # Get any page-level arguments
-        args.update(dictutil.extract("dataid", page, pop=False))
-        # Overwrite with specific args for bank
-        args.update(bank["args"])
-        item, sizing = getattr(self.bb, bank["type"])(**args)
-        if "width" in bank:
-            sizing["min"][1] = bank["width"]
-            sizing["ideal"][1] = bank["width"]
-        bank["sizing"] = sizing
-        return item
 
     def write(self, app_output: str = "bento_app.py", css_folder: str = "assets"):
         """Creates all of the standard Bento output files.

@@ -26,6 +26,16 @@ def process_inputs(input_dictionary):
     return {_cid2c(key): val for key, val in input_dictionary.items()}
 
 
+def strip_prefix(input_dictionary):
+    """Alters the keys of a dictionary by a helper function"""
+    return {key.split("|")[-1]: val for key, val in input_dictionary.items()}
+
+
+def strip_attr(input_dictionary):
+    """Alters the keys of a dictionary by a helper function"""
+    return {key.split(".")[0]: val for key, val in input_dictionary.items()}
+
+
 def extract(regex, input_dictionary, pop=True):
     """Splits off a subset dictionary with keys matching the provided 'path' prefix"""
     method = "pop" if pop else "get"

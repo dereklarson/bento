@@ -191,6 +191,8 @@ def {{callbacks[uid].name}}(*args):
 {{callbacks[uid].code}}
 {% endfor %}
 
+logging.info("Application loaded!")
+
 if __name__ == '__main__':
     app.run_server(debug=False)
 

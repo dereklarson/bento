@@ -12,7 +12,8 @@ As a straightforward example, let's build a dashboard that visualizes historical
 prices for a few large tech companies. As perhaps one of the most commonly experienced
 chart types in the world, most people should have some idea of what to expect here. You
 can see what we're gonna end up with by running ``$ bento-demo`` and clicking to the
-stock page on the app bar.
+stock page on the app bar. (Make sure you've followed the `Bento Quickstart
+<https://github.com/dereklarson/bento>`_)
 
 We can break this project up into four stages:
  - Plan the basic features
@@ -39,7 +40,7 @@ our interval.
 
 This translates into 4 total Bento banks:
  - A ``selector`` -- a multi-selection dropdown tied stock ticker symbols
- - A ``date_slider`` -- a two-sided slider bar, letting choose a date interval
+ - A ``date_control`` -- a two-sided slider bar, letting one choose a date interval
  - An ``analytics_set`` -- a toolkit that contains a normalization option
  - Lastly, a standard ``graph`` for the plotting of the time series
 
@@ -168,7 +169,7 @@ Try them in any order by looking at the completed version below:
     main_page = {
         "dataid": "stock",
         "banks": {
-            "traces": {"type": "graph", "args": {"mode": "lines"}},
+            "traces": {"type": "graph", "mode": "lines"},
         },
     }
 
@@ -183,6 +184,12 @@ Try them in any order by looking at the completed version below:
         "pages": {"main": main_page},
     }
 
+The full result should look like:
+
+.. image:: assets/beginner_step2.png
+    :width: 500
+    :alt: First interactivity is working
+
 Step 3
 ^^^^^^
 
@@ -192,7 +199,8 @@ add these lines to the ``banks`` dict:
 .. code-block:: python
 
     "analytics": {"type": "analytics_set"},
-    "symbols": {"type": "selector", "args": {"columns": ["symbol"]}},
+    "interval": {"type": "date_slider", "variant": "range"},
+    "symbols": {"type": "selector", "columns": ["symbol"]},
 
 You should now get some new blocks showing up, but they aren't very well-organized. As in,
 they are just stacked on top of each other, rather lazily. We can fix that by supplying
@@ -200,7 +208,7 @@ a layout. This should be intuitive, just add this to the page dict and see if it
 
 .. code-block:: python
 
-    "layout": [["symbols", "analytics"], ["traces"]],
+    "layout": [["symbols", "interval", "analytics"], ["traces"]],
 
 Currently, Bento expects a 2-D array of bank IDs, but a generalization to N-D could be
 in the cards.
@@ -213,12 +221,54 @@ following new dictionary keyed into the page:
 .. code-block:: python
 
     "connections": {
-        "symbols": {"traces"},
         "analytics": {"traces"},
+        "interval": {"traces"},
+        "symbols": {"traces"},
     },
 
-Now stuff should happen. And there was much rejoicing.
+Now stuff should happen. And there was much rejoicing. If not, double-check against the
+full descriptor below
 
-.. image:: assets/beginner_step2.png
-    :width: 400
+
+.. raw:: html
+
+   <details>
+   <summary><a>See the full descriptor</a></summary>
+
+.. code-block:: python
+
+    main_page = {
+        "dataid": "stock",
+        "banks": {
+            "traces": {"type": "graph", "mode": "lines"},
+            "analytics": {"type": "analytics_set"},
+            "interval": {"type": "date_slider", "variant": "range"},
+            "symbols": {"type": "selector", "columns": ["symbol"]},
+        },
+        "layout": [["symbols", "interval", "analytics"], ["traces"]],
+        "connections": {
+            "interval": {"traces"},
+            "symbols": {"traces"},
+            "analytics": {"traces"},
+        },
+    }
+
+    descriptor = {
+        "name": "beginner_tutorial",
+        "theme": "dark",
+        "appbar": {
+            "title": "Tech Stock Prices",
+            "subtitle": "A simple Bento starting point",
+        },
+        "data": {"stock": {"module": "bento.sample_data.stock"}},
+        "pages": {"main": main_page},
+    }
+
+.. raw:: html
+
+   </details>
+
+
+.. image:: assets/beginner_step3.png
+    :width: 600
     :alt: First interactivity is working
