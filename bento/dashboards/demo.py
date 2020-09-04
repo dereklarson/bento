@@ -149,6 +149,13 @@ def serve():
 
 
 if __name__ == "__main__":
-    from bento.bento import Bento
+    import inspect
 
-    Bento(descriptor).write()
+    print("Writing demo to ./descriptor.py")
+    lines = inspect.getsourcelines(inspect.getmodule(inspect.currentframe()))[0]
+
+    with open("descriptor.py", "w") as fh:
+        for line in lines:
+            if "def serve():" in line:
+                break
+            fh.write(line)

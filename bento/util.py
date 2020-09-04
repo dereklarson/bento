@@ -110,7 +110,7 @@ def rank(idf, key, text_key, column, count=10, **kwargs):
 
 
 def apply_defaults(component_type, raw_inputs, data):
-    inputs = {}
+    inputs = {"variant": component_type.split(".")[-1]}
     inputs.update(raw_inputs)
 
     if not component_type.startswith("graph.normal"):

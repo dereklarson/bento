@@ -42,7 +42,6 @@ class graph(Bank):
             filters = butil.prepare_filters(inputs)
             transforms = butil.prepare_transforms(inputs, dep_var="{dep_var}")
             figure = Graph.{category}(sdf,
-                variant="{variant}",
                 filters=filters,
                 transforms=transforms,
                 **inputs)
