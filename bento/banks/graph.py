@@ -1,5 +1,4 @@
 from bento import Bank
-import bento.components as bc
 
 
 class graph(Bank):
@@ -54,11 +53,7 @@ class graph(Bank):
             """
 
         # Generate the component calls
-        id_dict = {"name": "graph", **self.uid}
-        cid, component = bc.graph(id_dict, **kwargs)
-
-        cb_outputs = [(cid, "figure"), (cid, "style")]
-        self.add_callback(cid, cb_outputs, cb_code)
-
-        blocks = [[[component]]]
-        self.align(blocks, block_size)
+        graph = self.create_component("graph", name="graph", args={})
+        cb_outputs = [(graph.uid, "figure"), (graph.uid, "style")]
+        self.add_callback(graph.uid, cb_outputs, cb_code)
+        self.align(block_size)

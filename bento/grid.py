@@ -13,6 +13,8 @@ def apply_grid(page):
         gridsize["rowstart"] = 4
     layout = page.get("layout")
     arr, bout = arrange(page["banks"], layout, gridsize)
+    # TODO Handle more of the following outside the grid mechanics
+    # The list of bank layout objects is the core piece (in "banks")
     return {
         "layout": arr,
         "banks": bout,
@@ -32,7 +34,7 @@ def _rescale_ref(ref_sizes, grid_width=12, def_width=12):
     return new_sizes
 
 
-# @logutil.loginfo(level='debug')
+# @logutil.loginfo(level="debug")
 def arrange(banks, arrangement, grid):
     """Receives an ordered 2-d matrix of items and calculates default positions"""
     # Simply stack banks if there's no other info
@@ -49,24 +51,23 @@ def arrange(banks, arrangement, grid):
             continue
         curr_y = y_idx * y_step
         x_step = int(grid["width"] / len(arr_row))
-        for x_idx, bank in enumerate(arr_row):
-            bankid = bank["bankid"]
+        for x_idx, layout_obj in enumerate(arr_row):
+            bankid = layout_obj["bankid"]
             curr_x = x_idx * x_step + grid["rowstart"]
             # TODO Decide here
             # ref = _rescale_ref(banks[bankid]["sizing"], grid_width=grid["width"])
-            ref = banks[bankid]["sizing"]
-            bank.update(
+            layout_obj.update(banks[bankid].sizing)
+            layout_obj.update(
                 {
-                    "width": ref["ideal"][1],
-                    "slack": ref["ideal"][1] - ref["min"][1],
-                    "ref": ref,
-                    "position": banks[bankid].get("position", [curr_y, curr_x]),
+                    "width": layout_obj["ideal"][1],
+                    "slack": layout_obj["ideal"][1] - layout_obj["min"][1],
+                    "position": [curr_y, curr_x],
                     "column": curr_x,
                     "row": curr_y,
                 }
             )
-            bank["slack_frac"] = bank["slack"] / bank["ref"]["min"][1]
-            banks_out.append(bank)
+            layout_obj["slack_frac"] = layout_obj["slack"] / layout_obj["min"][1]
+            banks_out.append(layout_obj)
         appease(banks, arr_row, grid)
         for bank, r_neighbor in zip(arr_row[:-1], arr_row[1:]):
             r_neighbor["column"] = bank["column"] + bank["width"]
@@ -93,6 +94,6 @@ def appease(banks, row, grid):
         if bank["slack"] > 0:
             bank["width"] -= 1
             bank["slack"] -= 1
-            bank["slack_frac"] = bank["slack"] / bank["ref"]["min"][1]
+            bank["slack_frac"] = bank["slack"] / bank["min"][1]
             total_slack -= 1
             diff += 1

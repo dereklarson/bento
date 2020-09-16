@@ -11,7 +11,7 @@ logging = logger.fancy_logger(__name__)
 
 def desnake(text):
     """Turns underscores into spaces"""
-    return text.strip().replace("_", " ")
+    return str(text).strip().replace("_", " ")
 
 
 def titlize(text):
@@ -138,7 +138,7 @@ def apply_defaults(component_type, raw_inputs, data):
 
 # NOTE Used for preparing the traces for graphs
 # TODO Should combine this with filter_df/
-# @logutil.loginfo(level='debug')
+# @logutil.loginfo(level="debug")
 def prepare_traces(idf, filters, key_columns):
     # NOTE Brought over from figure callback, default multi-column approach
     # TODO Figure out how to determine default columns from df
@@ -196,7 +196,8 @@ def prepare_traces(idf, filters, key_columns):
 
     new_traces = []
     for df in traces:
-        new = df.groupby(key_columns).sum().reset_index()
+        if key_columns:
+            new = df.groupby(key_columns).sum().reset_index()
         new.name = df.name
         new_traces.append(new)
     traces = new_traces
@@ -226,6 +227,7 @@ def trace_analytics(traces, transforms):
     return traces
 
 
+# @logutil.loginfo(level="debug")
 def aggregate(idf, y_column=None, filters=None, logic="sum", keys=None, **kwargs):
     filters = filters or {}
     filters.update(kwargs.get("fixed_filters", {}))

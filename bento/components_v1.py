@@ -16,7 +16,14 @@ MAX_OPTIONS = 100
 
 
 def _create(
-    component_class, id_dict, gargs, lib="dcc", suffix="", label=None, **kwargs
+    component_class,
+    id_dict,
+    gargs,
+    lib="dcc",
+    out_attr="value",
+    suffix="",
+    label=None,
+    **kwargs,
 ):
     """Helps wrap Dash components so they can be easily written out via Jinja2"""
     bankid, name, pageid = dictutil.pluck(id_dict)
@@ -32,7 +39,13 @@ def _create(
             **dictutil.extract_path(f"{component_class}.", kwargs),
         },
     }
-    return cid, comp
+    output = {
+        "component_id": cid,
+        "component_dict": comp,
+        # Most of the js components have "value" as the attribute represeenting state
+        "output_attribute": out_attr,
+    }
+    return output
 
 
 # --- The rest are all component wrappers ---

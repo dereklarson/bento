@@ -2,6 +2,7 @@
 # import numpy as np
 # import datetime as dt
 import math
+import numpy as np
 import plotly.graph_objects as go
 
 from bento import util as butil
@@ -17,12 +18,15 @@ class Graph:
         cls,
         idf,
         variant="scatter",
+        subvariant="normal",
         x_column=None,
         y_column=None,
         x_label=None,
         y_label=None,
         x_scale="linear",
         y_scale="linear",
+        size_column=None,
+        symbol_column=None,
         color=None,
         opacity=0.7,
         mode="lines+markers",
@@ -61,6 +65,35 @@ class Graph:
             settings.update(style_settings.get(variant, {}))
 
             fig.add_trace(graph_call(**settings))
+
+        elif subvariant in ("training"):
+            key_columns = keys
+            traces = [butil.filter_df(idf, filters)]
+
+            for trace_df in traces:
+                for y_column in y_columns:
+                    default_settings = {
+                        "x": trace_df[x_column],
+                        "y": trace_df[y_column],
+                        "marker_symbol": trace_df[symbol_column].map(
+                            {False: "circle", True: "star"}
+                        ),
+                        "marker_size": trace_df[size_column].apply(np.log) * 3 - 30,
+                        "name": f"{y_column.title()}",
+                    }
+
+                    style_settings = {
+                        "scatter": {
+                            "opacity": opacity,
+                            "mode": mode,
+                            "marker_line_width": marker_line_width,
+                            "marker_line_color": marker_line_color,
+                        },
+                    }
+
+                    settings = default_settings
+                    settings.update(style_settings.get(variant, {}))
+                    fig.add_trace(graph_call(**settings))
 
         elif variant in ("scatter", "bar", "histogram"):
             traces = butil.prepare_traces(idf, filters, key_columns)

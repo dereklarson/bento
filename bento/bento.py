@@ -10,7 +10,7 @@ from typing import Dict, List
 from jinja2 import Environment, PackageLoader
 
 from bento import util as butil
-from bento import banks, banks_v1, grid, schema, style
+from bento import banks, grid, schema, style
 
 from bento.common import logger, logutil, dictutil, codeutil  # noqa
 
@@ -75,7 +75,6 @@ class Bento:
 
         # Loads the input data to inform components to the columns, types, etc
         self.data = self.process_data(self.desc)
-        self.bb = banks_v1.BentoBanks(self.data)
 
         # Generates the initial context object
         self.init_structure()
@@ -109,7 +108,7 @@ class Bento:
     def bankid(self, pagename, bankname, delim="__"):
         return f"{pagename}{delim}{bankname}"
 
-    # @logutil.loginfo(level='debug')
+    # @logutil.loginfo(level="debug")
     def normalize(self, descriptor: Dict) -> Dict:
         """Auto-trims and -fills the descriptor.
 
@@ -175,12 +174,17 @@ class Bento:
             # Finally fix the banks
             new_banks = {}
             for bankname, bank in page["banks"].items():
-                bank["args"] = bank.get("args", {})
-                bank["args"]["uid"] = {"pageid": pagename, "bankid": bankname}
+                bank["uid"] = {"pageid": pagename, "bankid": bankname}
+
+                # If dataid not defined, grabs the first dataid in the data dictionary
                 default_dataid = page.get("dataid", list(desc["data"].keys())[0])
-                bank["args"]["dataid"] = bank["args"].get("dataid", default_dataid)
+                bank["dataid"] = bank.get("dataid", default_dataid)
+
                 new_banks[self.bankid(pagename, bankname)] = bank
-            page["banks"] = new_banks
+            page["bank_dicts"] = new_banks
+
+            # Make space for the bank class instances
+            page["banks"] = {}
         logging.info("#$+ done")
         return desc
 
@@ -255,48 +259,24 @@ class Bento:
         object (an array of 2+ dim).
         """
         # Prepares the definitions of the bank containers
-        for bankid, bank in page["banks"].items():
-            # Use new Bank class first, fall back to old system
-            try:
-                bank = self.load_bank(bank)
-                self._outputs.update(bank.outputs)
-                self.context["banks"][bankid] = bank.layout
-                self.context["callbacks"].update(bank.callbacks)
-                self.context["connectors"].update(bank.connectors)
-            except Exception:
-                logging.debug(f"Failed new Bank load for {bankid}")
-                self.context["banks"][bankid] = self.build_bank(bank, page)
-
-        self._outputs.update(self.bb.outputs)
-        self.context["callbacks"].update(self.bb.callbacks)
-        self.context["connectors"].update(self.bb.connectors)
+        for bankid, bank_dict in page["bank_dicts"].items():
+            bank = self.load_bank(bank_dict)
+            page["banks"][bankid] = bank
+            self._outputs.update(bank.outputs)
+            self.context["banks"][bankid] = bank.layout
+            self.context["callbacks"].update(bank.callbacks)
+            self.context["connectors"].update(bank.connectors)
 
         # Defines the layout of the page
         self.context["pages"][pageid] = grid.apply_grid(page)
 
     # @logutil.loginfo(level='debug')
     def load_bank(self, bank: Dict) -> List:
-        # TODO Eliminate 'args' and perhaps pop type from bank
-        bank_obj = banks._bank_map[bank["type"]](
-            g_data=self.data, **bank, **bank["args"]
-        )
+        bank_type = bank.pop("type")
+        bank_obj = banks._bank_map[bank_type](g_data=self.data, **bank)
         # TODO Eliminate dependence on this
         bank["sizing"] = bank_obj.sizing
         return bank_obj
-
-    # @logutil.loginfo(level='debug')
-    def build_bank(self, bank: Dict, page: Dict) -> List:
-        args = {"dataid": ""}
-        # Get any page-level arguments
-        args.update(dictutil.extract("dataid", page, pop=False))
-        # Overwrite with specific args for bank
-        args.update(bank["args"])
-        item, sizing = getattr(self.bb, bank["type"])(**args)
-        if "width" in bank:
-            sizing["min"][1] = bank["width"]
-            sizing["ideal"][1] = bank["width"]
-        bank["sizing"] = sizing
-        return item
 
     def connect_page(self, page: Dict):
         """Applies the requested connections for the page to the Jinja context

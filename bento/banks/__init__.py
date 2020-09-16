@@ -1,8 +1,13 @@
 # Import all Bank classes, so we can access them by name on demand
 from .analytics_set import analytics_set  # noqa
+from .axis_controls import axis_controls  # noqa
+from .data_table import data_table  # noqa
 from .date_control import date_control  # noqa
 from .graph import graph  # noqa
+from .indicators import indicators  # noqa
+from .ranking import ranking  # noqa
 from .selector import selector  # noqa
+from .text_box import text_box  # noqa
 
 import sys
 import inspect

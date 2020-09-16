@@ -1,7 +1,6 @@
 import numpy as np
 
 from bento import Bank
-import bento.components as bc
 
 
 class date_control(Bank):
@@ -39,32 +38,33 @@ class date_control(Bank):
         column = column or default
 
         # Generate the component calls
-        label = f"Select {column}:"
-        id_dict = {"name": f"{column}_filter", **self.uid}
-        series = np.unique(self.df[column])
-        slider_id, slider = bc.slider(id_dict, series, label, variant=self.variant)
-        self.outputs[slider_id] = "value"
+        args = dict(
+            options=np.unique(self.df[column]),
+            label=f"Select {column}:",
+            variant=variant,
+        )
+        slider = self.create_component("slider", f"{column}_filter", args=args)
 
         # Return early if we only have a slider
         if not picker:
-            blocks = [[[slider]]]
-            self.align(blocks, block_size)
+            self.align(block_size)
             return
 
+        # Increase size to fit the date picker
         block_size = {"ideal": [2, 4], "min": [1, 3]}
-        id_dict = {"name": f"{column}_picker", **self.uid}
-        dt_series = np.unique(self.df[column].dt.to_pydatetime())
-        picker_id, picker = bc.date_picker(
-            id_dict, dt_series, None, variant=self.variant
+
+        args = dict(
+            options=np.unique(self.df[column].dt.to_pydatetime()), variant=variant
         )
+        picker = self.create_component("date_picker", f"{column}_picker", args=args)
         # TODO The code creation needs a better methodology
         if self.variant == "single":
-            cb_inputs = [(picker_id, "date")]
+            cb_inputs = [(picker.uid, "date")]
             extractor = """
             return numpy.datetime64(dictutil.extract_unique("date", inputs), 'ns')
             """
         elif self.variant == "range":
-            cb_inputs = [(picker_id, "start_date"), (picker_id, "end_date")]
+            cb_inputs = [(picker.uid, "start_date"), (picker.uid, "end_date")]
             extractor = """
             start = dictutil.extract_unique("start_date", inputs)
             end = dictutil.extract_unique("end_date", inputs)
@@ -72,7 +72,7 @@ class date_control(Bank):
             return ret
             """
 
-        cb_outputs = [(slider_id, "value")]
-        self.add_internal_callback(slider_id, cb_inputs, cb_outputs, extractor)
-        blocks = [[[picker], [slider]]]
-        self.align(blocks, block_size)
+        cb_outputs = [(slider.uid, "value")]
+        self.add_internal_callback(slider.uid, cb_inputs, cb_outputs, extractor)
+        self.blocks = [[[picker.definition], [slider.definition]]]
+        self.align(block_size)

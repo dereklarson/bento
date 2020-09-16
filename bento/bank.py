@@ -2,7 +2,8 @@
 """
 import numpy as np
 
-from bento.common import logger, logutil, codeutil, dictutil  # noqa
+from bento import components
+from bento.common import logger, logutil, dictutil  # noqa
 
 logging = logger.fancy_logger(__name__)
 
@@ -66,6 +67,7 @@ class Bank:
         # Store the kwargs for processing in the callback
         self.kwargs = kwargs
 
+        self.blocks = []
         # The following 2 are defaults to be overwritten later
         self.layout = [[]]
         self.sizing = {"ideal": [2, 2], "min": [1, 1]}
@@ -74,8 +76,25 @@ class Bank:
         self.callbacks = {}
         self.connectors = {}
 
+    def create_id(self, name):
+        return {"name": name, **self.uid}
+
+    def create_component(self, component_class, name, args):
+        """Handles the bookkeeping on creating a component of a bank
+
+        In simple cases, this call is convenient and easy to use. However,
+        once a bank gets more complicated, it is likely better to forego
+        this and do these steps manually within the bank
+        """
+        args["id_dict"] = {"name": name, **self.uid}
+        comp = components._component_map[component_class](**args)
+        self.blocks.append([[comp.definition]])
+        self.outputs[comp.uid] = comp.output
+        return comp
+
     # @logutil.loginfo(level='debug')
-    def align(self, blocks, block_size):
+    def align(self, block_size):
+        blocks = self.blocks
         if self.vertical:
             self.layout = np.vstack(blocks)
             ideal_height = int(len(blocks) * block_size["ideal"][0])
@@ -108,24 +127,26 @@ class Bank:
     def add_callback(self, target_cid, cb_outputs, code):
         """Adds callback function that can update the component of the bank"""
 
+        # A standard block to handle the inputs to the callback via callback_context
         input_processing = f"""
             data = _global_data["{self.dataid}"]
             sdf = data["df"]
             inputs = dictutil.strip_prefix(dash.callback_context.inputs)
             inputs.update({self.kwargs})
         """
-        callback_code = "\n    ".join([input_processing, code])
+        code_blocks = [input_processing, code]
 
         self.callbacks[target_cid] = {
             "provides": [val[1] for val in cb_outputs],
             "name": self.name_callback(target_cid),
-            "code": codeutil.format_code(callback_code),
+            "code": self.format_code(code_blocks),
         }
 
     def add_internal_callback(self, target_cid, cb_inputs, cb_outputs, code):
         """Adds a callback meant to update intra-bank components"""
 
-        # The extra bit is defining up front what inputs the callback takes
+        # Ths bit defines up front what inputs the callback takes, which we would
+        # know for a callback internal to the bank.
         # (this is handled by user-defined inter-bank connections otherwise)
         self.connectors[target_cid] = {
             "inputs": cb_inputs,
@@ -133,3 +154,20 @@ class Bank:
         }
 
         self.add_callback(target_cid, cb_outputs, code)
+
+    def format_code(self, code_blocks, base_indents=1):
+        """Handle indentation of text that will be templated out to code"""
+        # We'll identify the starting indent level for each code block, and align
+        # them to the supplied base indent level
+        indent_str = " " * 4 * base_indents
+        output_lines = []
+        for cblock in code_blocks:
+            # Eliminate all blank lines (black will add them as needed)
+            # This handles the leading blank that will always be there
+            raw_lines = [line for line in cblock.split("\n") if line.strip()]
+            # The leftmost line will determine our presumed indent level
+            indent = min([len(line) - len(line.lstrip(" ")) for line in raw_lines])
+            stripped_lines = [line[indent:] for line in raw_lines]
+            output_lines += stripped_lines
+
+        return indent_str + f"\n{indent_str}".join(output_lines)

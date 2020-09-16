@@ -104,7 +104,7 @@ app.layout = html.Div(children=main_children, id="main", style=classes.main)
 
 {% endfor %}
 
-# Each page definition is a grid of bootstrap Rows and Cols containing Banks
+# Each page definition is a Div grid defined by html grid specs (e.g. gridColumn)
 {% for page_id, page in pages.items() %}
 {{page_id}}_page = html.Div(id='{{page_id}}', children=[
   {% if page.intro %}

@@ -43,6 +43,7 @@ setup(
         "bento",
         "bento.banks",
         "bento.common",
+        "bento.components",
         "bento.dashboards",
         "bento.sample_data",
     ],

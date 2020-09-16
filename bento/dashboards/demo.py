@@ -3,32 +3,30 @@ mars_page = {
     "subtitle": "Demonstrating graph options and style",
     "dataid": "mars",
     "banks": {
-        "selector": {"type": "axis_controls", "args": {"use": "xy", "scale": True}},
-        "filters": {"type": "selector", "args": {}},
+        "axes": {"type": "axis_controls", "axes": "xy", "scale": True},
+        "filters": {"type": "selector"},
         "agg": {
             "type": "indicators",
             "width": 2,
-            "args": {
-                "components": [
-                    {
-                        "args": {
-                            "y_column": "population",
-                            "fixed_filters": {"or": {"date": ["2149-04-21"]}},
-                        }
+            "components": [
+                {
+                    "args": {
+                        "y_column": "population",
+                        "fixed_filters": {"or": {"date": ["2149-08-07"]}},
                     }
-                ]
-            },
+                }
+            ],
         },
         "traces": {"type": "graph"},
-        "style": {
-            "type": "style_controls",
-            "args": {"vertical": True, "variants": ["scatter", "bar"]},
-        },
+        # "style": {
+        #     "type": "style_controls",
+        #     "vertical": True, "variants": ["scatter", "bar"],
+        # },
     },
-    "layout": [["selector", "filters", "agg"], ["traces"], ["style"]],
+    "layout": [["axes", "filters", "agg"], ["traces"], ["style"]],
     "connections": {
         "style": {"traces"},
-        "selector": {"traces"},
+        "axes": {"traces"},
         "filters": {"traces", "agg"},
     },
 }
@@ -38,24 +36,29 @@ stock_page = {
     "subtitle": "Demonstrating analytical features",
     "dataid": "stock",
     "banks": {
-        "selector": {
+        "axes": {
             "type": "axis_controls",
-            "args": {"use": "y", "y.default": "open", "scale": True},
+            "axes": "y",
+            "y.default": "open",
+            "scale": True,
         },
         "filters": {
             "type": "selector",
             "width": 4,
-            "args": {"vertical": True, "columns": ["symbol"]},
+            "vertical": True,
+            "columns": ["symbol"],
         },
         "analytics": {"type": "analytics_set"},
         "traces": {
             "type": "graph",
-            "args": {"x_column": "date", "x_scale": "date", "mode": "lines"},
+            "x_column": "date",
+            "x_scale": "date",
+            "mode": "lines",
         },
     },
-    "layout": [["selector", "filters", "analytics"], ["traces"]],
+    "layout": [["axes", "filters", "analytics"], ["traces"]],
     "connections": {
-        "selector": {"traces"},
+        "axes": {"traces"},
         "analytics": {"traces"},
         "filters": {"traces"},
     },
@@ -64,50 +67,50 @@ stock_page = {
 oilngas_page = {
     "dataid": "oil",
     "banks": {
-        "selector": {"width": 3, "type": "axis_controls", "args": {"use": "xy"},},
-        "daterange": {"width": 4, "type": "date_slider", "args": {"variant": "range"},},
+        "axes": {"width": 3, "type": "axis_controls", "axes": "xy"},
+        "daterange": {"width": 4, "type": "date_control", "variant": "range"},
         "filters": {
             "type": "selector",
-            "args": {"columns": ["type", "status"], "vertical": True},
+            "columns": ["type", "status"],
+            "vertical": True,
             "width": 4,
         },
         "aggregates": {
             "type": "indicators",
-            "args": {
-                "components": [
-                    {"args": {"y_column": "wells"},},
-                    {"args": {"y_column": "gas_produced"}, "unit": "cf"},
-                    {"args": {"y_column": "oil_produced"}, "unit": "bbl"},
-                    {"args": {"y_column": "water_produced"}, "unit": "bbl"},
-                ],
-            },
+            "components": [
+                {"args": {"y_column": "wells"},},
+                {"args": {"y_column": "gas_produced"}, "unit": "cf"},
+                {"args": {"y_column": "oil_produced"}, "unit": "bbl"},
+                {"args": {"y_column": "water_produced"}, "unit": "bbl"},
+            ],
         },
-        "barplot": {"type": "graph", "args": {"variant": "bar"}},
-        "pieplot": {"type": "graph", "args": {"variant": "pie", "x_column": "type"}},
+        "barplot": {"type": "graph", "variant": "bar"},
+        "pieplot": {"type": "graph", "variant": "pie", "x_column": "type"},
         "satellite": {
             "type": "graph",
             "width": 8,
-            "args": {"category": "map", "variant": "scatter", "mapbox_center": "auto"},
+            "category": "map",
+            "variant": "scatter",
+            "mapbox_center": "auto",
         },
-        "style": {"type": "style_controls"},
     },
     "layout": [
-        ["daterange", "aggregates", "selector"],
+        ["daterange", "aggregates", "axes"],
         ["filters", "barplot"],
         ["pieplot", "satellite"],
     ],
     "connections": {
         "daterange": {"barplot", "aggregates", "pieplot",},
         "filters": {"barplot", "aggregates", "satellite",},
-        "selector": {"barplot", "pieplot"},
+        "axes": {"barplot", "pieplot"},
     },
 }
 
 data_page = {
     "banks": {
-        "mars_table": {"type": "data_table", "args": {"dataid": "mars"}},
-        "oil_table": {"type": "data_table", "width": 6, "args": {"dataid": "oil"}},
-        "stock_table": {"type": "data_table", "width": 12, "args": {"dataid": "stock"}},
+        "mars_table": {"type": "data_table", "dataid": "mars"},
+        "oil_table": {"type": "data_table", "width": 6, "dataid": "oil"},
+        "stock_table": {"type": "data_table", "width": 12, "dataid": "stock"},
     },
     "layout": [["mars_table", "oil_table"], ["stock_table"]],
     "connections": {},
