@@ -28,9 +28,9 @@ class Graph:
         size_column=None,
         symbol_column=None,
         color=None,
-        opacity=0.7,
         mode="lines+markers",
         line_width=3,
+        marker_opacity=1.0,
         marker_size=10,
         marker_line_width=0.5,
         marker_line_color="black",
@@ -49,7 +49,7 @@ class Graph:
             y_columns = y_column
             y_label = y_label or y_column[0]
 
-        key_columns = keys or ["date"]
+        key_columns = keys if keys is not None else ["date"]
 
         graph_call = getattr(go, variant.title())
 
@@ -66,7 +66,7 @@ class Graph:
 
             fig.add_trace(graph_call(**settings))
 
-        elif subvariant in ("training"):
+        elif variant == "scatter" and subvariant in ("training"):
             key_columns = keys
             traces = [butil.filter_df(idf, filters)]
 
@@ -84,8 +84,8 @@ class Graph:
 
                     style_settings = {
                         "scatter": {
-                            "opacity": opacity,
                             "mode": mode,
+                            "marker_opacity": marker_opacity,
                             "marker_line_width": marker_line_width,
                             "marker_line_color": marker_line_color,
                         },
@@ -120,12 +120,12 @@ class Graph:
 
                     style_settings = {
                         "scatter": {
-                            "opacity": opacity,
                             "mode": mode,
                             "line_width": line_width,
-                            "marker_size": marker_size,
                             "marker_line_width": marker_line_width,
                             "marker_line_color": marker_line_color,
+                            "marker_opacity": marker_opacity,
+                            "marker_size": marker_size,
                         },
                     }
 

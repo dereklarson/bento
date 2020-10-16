@@ -1,7 +1,7 @@
 # Import all Bank classes, so we can access them by name on demand
 from .html import div, indicator  # noqa
 from .display import graph  # noqa
-from .selection import date_picker, dropdown, radio, slider  # noqa
+from .selection import date_picker, dropdown, selection_list, slider  # noqa
 from .table import table  # noqa
 
 import sys

@@ -7,16 +7,14 @@ logging = logger.fancy_logger(__name__)
 
 
 class selector(Bank):
-    """Provides means to set a date or date interval interactively
+    """Creates data filters that determine the traces, based on categorical columns.
 
     Initialization Parameters
     -------------------------
-    window: bool
-        Whether to include the windowing component or not
-    normalization: bool
-        Whether to include the normalization component or not
-    calculus: bool
-        Whether to include the calculus (rates, sums) component or not
+    columns: tuple
+        The set of columns from the dataframe that will be used in selection. If this
+        isn't specified in the descriptor, the columns used will default to those
+        listed as keys in the descriptor.
 
     Attributes
     ----------
@@ -33,13 +31,14 @@ class selector(Bank):
 
         columns = columns or self.data["keys"]
 
+        # TODO Try to meld this with what happens in the option_set bank
+        # (e.g. a util function or a class method of option_set)
         for col in columns:
             option_args = dictutil.extract_path(f"{col}.", kwargs)
             option_vals = pd.Series(sorted(self.df[col].unique()))
             options_numeric = np.issubdtype(option_vals, np.number)
             options = {
                 "options": list(option_vals),
-                "default": [],
                 "overflow": f"""
                     list(_global_data["{self.dataid}"]["df"]["{col}"].unique())""",
                 **option_args,
@@ -48,15 +47,16 @@ class selector(Bank):
             # Default to a dropdown
             comp_type = "dropdown"
             args = {
-                "Dropdown.multi": True,
                 "label": f"Select {col}".title(),
                 "marks": True,
+                "multi": True,
+                "Dropdown.multi": True,
+                "RadioItems.labelStyle": {"display": "block"},
+                "Checklist.labelStyle": {"display": "block"},
             }
-            # If there are 3 or fewer options, go for radio buttons
-            if not options_numeric and len(options["options"]) <= 3:
-                comp_type = "radio"
-            # If there are numerics, use a slider
-            elif options_numeric:
+            if len(options["options"]) <= 3:  # Use a list for few options
+                comp_type = "selection_list"
+            elif options_numeric:  # If there are numerics, use a slider
                 comp_type = "slider"
                 options = option_vals
                 args["variant"] = "range"
@@ -65,11 +65,11 @@ class selector(Bank):
 
         self.align(block_size)
 
-        # TODO Implement logical combinations once analytics treatment finished
-        # if len(columns) >= 2:
-        #     id_dict = {"name": f"filter_logic", **uid}
-        #     cargs = {"Dropdown.clearable": False, **kwargs}
-        #     options = {"options": ["And", "Or"], "default": "Or"}
-        #     drop_id, dropdown = bc.dropdown(id_dict, options, label=None, **cargs)
-        #     self.outputs[drop_id] = "value"
-        #     blocks.append([[dropdown]])
+    # TODO Implement logical combinations once analytics treatment finished
+    # if len(columns) >= 2:
+    #     id_dict = {"name": f"filter_logic", **uid}
+    #     cargs = {"Dropdown.clearable": False, **kwargs}
+    #     options = {"options": ["And", "Or"], "default": "Or"}
+    #     drop_id, dropdown = bc.dropdown(id_dict, options, label=None, **cargs)
+    #     self.outputs[drop_id] = "value"
+    #     blocks.append([[dropdown]])

@@ -29,8 +29,8 @@ class date_picker(Component):
 
 
 class dropdown(Component):
-    def __init__(self, options, **kwargs):
-        args = {**butil.gen_options(options)}
+    def __init__(self, options, multi=False, **kwargs):
+        args = {**butil.gen_options(options, multi=multi)}
         if len(args["options"]) > MAX_OPTIONS:
             if "overflow" in options:
                 args.pop("options")
@@ -44,10 +44,13 @@ class dropdown(Component):
         super().__init__("dcc", "Dropdown", args, **kwargs)
 
 
-class radio(Component):
-    def __init__(self, options, **kwargs):
-        args = {**butil.gen_options(options)}
-        super().__init__("dcc", "RadioItems", args, **kwargs)
+class selection_list(Component):
+    def __init__(self, options, multi=False, **kwargs):
+        args = {**butil.gen_options(options, multi=multi)}
+        if multi:
+            super().__init__("dcc", "Checklist", args, **kwargs)
+        else:
+            super().__init__("dcc", "RadioItems", args, **kwargs)
 
 
 class slider(Component):

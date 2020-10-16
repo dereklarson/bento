@@ -51,8 +51,10 @@ class axis_controls(Bank):
                 continue
 
             # Define the radio buttons to select the axis scale
-            args = {"options": ["linear", "log"]}
-            radio = self.create_component("radio", name=f"{axis}_scale", args=args)
+            args = {"options": ["linear", "log"], "multi": False}
+            radio = self.create_component(
+                "selection_list", name=f"{axis}_scale", args=args
+            )
 
             # TODO includes temporary multi-column support
             callback_code = f"""

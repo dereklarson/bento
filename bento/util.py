@@ -89,7 +89,7 @@ def filter_df(idf, filters):
                 except TypeError:
                     odf = odf[
                         (odf[column].astype(int) >= values[0])
-                        & (odf[column].astype(int) <= values[1])
+                        & (odf[column].astype(int) <= values[1])  # noqa
                     ]
             elif logic == "or":
                 odf = odf[odf[column].isin(values)]
@@ -159,7 +159,7 @@ def prepare_traces(idf, filters, key_columns):
                     except TypeError:
                         new = df[
                             (df[column].astype(int) >= values[0])
-                            & (df[column].astype(int) <= values[1])
+                            & (df[column].astype(int) <= values[1])  # noqa
                         ]
                     new.name = df.name
                     new_traces.append(new)
@@ -195,11 +195,13 @@ def prepare_traces(idf, filters, key_columns):
         traces = new_traces
 
     new_traces = []
-    for df in traces:
-        if key_columns:
+    if key_columns:
+        for df in traces:
             new = df.groupby(key_columns).sum().reset_index()
-        new.name = df.name
-        new_traces.append(new)
+            new.name = df.name
+            new_traces.append(new)
+    else:
+        new_traces = traces
     traces = new_traces
 
     return traces
@@ -266,22 +268,27 @@ def gen_marks(series, variant="auto"):
     return marks
 
 
-def gen_options(option_input, default=None):
+def gen_options(option_input, multi=False, default=None):
     # In this case, we're given just the set of options only, assuming first is default
     if isinstance(option_input, list):
         option_list = option_input
-        default = default if default is not None else option_list[0]
+        base_default = [] if multi else option_list[0]
+        default = default if default is not None else base_default
     # The default may be specified in the dict version
     elif isinstance(option_input, dict):
         # TODO Make this more robust
         if "value" in option_input:
             return option_input
         option_list = option_input["options"]
+        base_default = [] if multi else option_list[0]
         default = (
             default
             if default is not None
-            else option_input.get("default", option_list[0])
+            else option_input.get("default", base_default)
         )
+    else:
+        logging.warning(f"Unsupported type {type(option_input)} for options")
+        logging.debug(option_input)
     # TODO Can we determine when we should run desnake on the entries?
     options = [{"label": desnake(item).title(), "value": item} for item in option_list]
     return {"options": options, "value": default}
