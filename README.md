@@ -1,5 +1,8 @@
 # Bento
 
+### *Note: Bento is not currently maintained (2021-)*
+Feel free to take any inspiration you like, but don't expect stuff to work. :)
+ 
 [![GitHub](https://img.shields.io/github/license/dereklarson/bento?style=for-the-badge)](https://github.com/dereklarson/bento/blob/master/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/bento-dash?style=for-the-badge)](https://pypi.org/project/bento-dash/)
 [![PyPI](https://img.shields.io/pypi/v/bento-dash?style=for-the-badge)](https://pypi.org/project/bento-dash/)
